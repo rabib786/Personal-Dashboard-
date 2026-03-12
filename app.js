@@ -949,6 +949,42 @@ function saveManualCity() {
     if(city) { dashSettings.weatherCity = city; localStorage.setItem('dashSettings', JSON.stringify(dashSettings)); document.getElementById('weather-container').innerHTML = '<div class="loading">Fetching...</div>'; fetchWeatherForCity(); }
 }
 
+function getLocalMoonPhase() {
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth() + 1;
+    let day = now.getDate();
+
+    if (month < 3) {
+        year--;
+        month += 12;
+    }
+
+    ++month;
+    let c = 365.25 * year;
+    let e = 30.6 * month;
+    let jd = c + e + day - 694039.09;
+    jd /= 29.5305882;
+    let b = parseInt(jd);
+    jd -= b;
+    b = Math.round(jd * 8);
+
+    if (b >= 8) b = 0;
+
+    const phases = [
+        { name: "New Moon", icon: "ph-moon" },
+        { name: "Waxing Crescent", icon: "ph-moon" },
+        { name: "First Quarter", icon: "ph-moon" },
+        { name: "Waxing Gibbous", icon: "ph-moon" },
+        { name: "Full Moon", icon: "ph-moon-stars" },
+        { name: "Waning Gibbous", icon: "ph-moon" },
+        { name: "Last Quarter", icon: "ph-moon" },
+        { name: "Waning Crescent", icon: "ph-moon" }
+    ];
+
+    return phases[b];
+}
+
 function getWeatherDetails(code, isDay = 1) {
     if (code === 0) return { desc: 'Clear', icon: isDay ? '<i class="ph-fill ph-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-moon" style="color: #a1a1a6;"></i>', bgClass: isDay ? 'weather-bg-clear-day' : 'weather-bg-clear-night' };
     if ([1,2].includes(code)) return { desc: 'Cloudy', icon: isDay ? '<i class="ph-fill ph-cloud-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-cloud-moon" style="color: #a1a1a6;"></i>', bgClass: isDay ? 'weather-bg-cloudy-day' : 'weather-bg-cloudy-night' };
@@ -1017,9 +1053,47 @@ async function fetchWeather(lat, lon, locName) {
                     <div class="stat-item"><span class="stat-label">Vis.</span><span class="stat-val">${(cur.visibility/1000).toFixed(1)}km</span></div>
                     <div class="stat-item"><span class="stat-label">Press.</span><span class="stat-val">${Math.round(cur.surface_pressure)}hPa</span></div>
                 </div>
-                <div class="sun-cycle" style="width: 100%; box-sizing: border-box;">
-                    <span><i class="ph-fill ph-sunrise" style="color: #fbbc04; font-size: 1.1rem;"></i> <span style="color:var(--text-main)">${new Date(day.sunrise[0]).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</span></span>
-                    <span><i class="ph-fill ph-sunset" style="color: #ff9500; font-size: 1.1rem;"></i> <span style="color:var(--text-main)">${new Date(day.sunset[0]).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</span></span>
+                <div class="sun-cycle" style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 15px 10px 25px 10px; background: var(--inner-bg); border-radius: 16px; margin-bottom: 15px;">
+                    <div style="width: 100%; max-width: 200px; position: relative; height: 50px; margin-bottom: 10px;">
+                        <svg viewBox="0 0 100 55" style="width: 100%; height: 100%; overflow: visible; display: block;">
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="var(--glass-border)" stroke-width="2" stroke-dasharray="4 4" />
+                            <circle cx="10" cy="50" r="2" fill="var(--text-muted)" />
+                            <circle cx="90" cy="50" r="2" fill="var(--text-muted)" />
+                            ${(() => {
+                                const now = new Date();
+                                const sunrise = new Date(day.sunrise[0]);
+                                const sunset = new Date(day.sunset[0]);
+                                let progress = 0;
+                                if (now < sunrise) progress = 0;
+                                else if (now > sunset) progress = 1;
+                                else progress = (now - sunrise) / (sunset - sunrise);
+
+                                const angle = Math.PI - (progress * Math.PI);
+                                const x = 50 + 40 * Math.cos(angle);
+                                const y = 50 - 40 * Math.sin(angle);
+
+                                let isSunVisible = now >= sunrise && now <= sunset;
+
+                                if (!isSunVisible) return ''; // Hide sun when it's down
+
+                                return `<g transform="translate(${x}, ${y})">
+                                            <circle cx="0" cy="0" r="4" fill="#fbbc04" style="filter: drop-shadow(0 0 4px #fbbc04);" />
+                                        </g>`;
+                            })()}
+                        </svg>
+                        <div style="position: absolute; bottom: -22px; left: -10px; font-size: 0.7rem; font-weight: 700; text-align: center; color: var(--text-main);">
+                            <i class="ph-fill ph-sunrise" style="color: #fbbc04; font-size: 1.1rem; display: block; margin-bottom: 2px;"></i>
+                            ${new Date(day.sunrise[0]).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}
+                        </div>
+                        <div style="position: absolute; bottom: -22px; right: -10px; font-size: 0.7rem; font-weight: 700; text-align: center; color: var(--text-main);">
+                            <i class="ph-fill ph-sunset" style="color: #ff9500; font-size: 1.1rem; display: block; margin-bottom: 2px;"></i>
+                            ${new Date(day.sunset[0]).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}
+                        </div>
+                    </div>
+                    <div style="margin-top: 30px; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 5px;">
+                        <i class="ph-fill ${getLocalMoonPhase().icon}" style="font-size: 1.1rem; color: #a1a1a6;"></i>
+                        ${getLocalMoonPhase().name}
+                    </div>
                 </div>`;
         let hIdx = hr.time.findIndex(t => t >= new Date().toISOString().slice(0, 14)+"00"); if(hIdx === -1) hIdx = 0;
         html += `<div style="width: 100%;"><div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; color: var(--text-muted);">Hourly</div><div class="hourly-forecast">`;
