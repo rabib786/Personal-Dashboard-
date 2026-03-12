@@ -1,0 +1,21 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test-runner.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabib786/Personal-Dashboard-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rabib786/Personal-Dashboard-/issues"
+  },
+  "homepage": "https://github.com/rabib786/Personal-Dashboard-#readme"
+}
