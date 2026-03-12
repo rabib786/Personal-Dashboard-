@@ -115,7 +115,60 @@ function applyVisuals() {
         root.style.setProperty('--accent', dashSettings.accentColor);
         root.style.setProperty('--accent-hover', adjustColorHover(dashSettings.accentColor, -20));
     }
+
+    // Dynamic Iconography Weight
+    const iconWeight = getThemeIconWeight();
+
+    // Swap icon weights in the DOM
+    document.querySelectorAll('i[class*="ph-"]').forEach(icon => {
+        // Skip explicitly filled icons if they are structural, but if material we want mostly filled
+        if(icon.classList.contains('ph-fill') && dashSettings.themeStyle !== 'material') return;
+
+        // Remove existing weight classes
+        icon.classList.remove('ph-thin', 'ph-light', 'ph-regular', 'ph-bold', 'ph-fill', 'ph-duotone');
+
+        // Add the new weight class
+        icon.classList.add(iconWeight);
+    });
 }
+
+function getThemeIconWeight() {
+    let iconWeight = 'ph-regular';
+    if (dashSettings.themeStyle === 'glass') iconWeight = 'ph-thin';
+    else if (dashSettings.themeStyle === 'brutalism') iconWeight = 'ph-bold';
+    else if (dashSettings.themeStyle === 'terminal') iconWeight = 'ph-bold';
+    else if (dashSettings.themeStyle === 'pixel') iconWeight = 'ph-bold';
+    else if (dashSettings.themeStyle === 'material') iconWeight = 'ph-fill';
+    else if (dashSettings.themeStyle === 'cyberpunk') iconWeight = 'ph-light';
+    else if (dashSettings.themeStyle === 'e-ink') iconWeight = 'ph-bold';
+    return iconWeight;
+}
+
+// Observe DOM mutations to apply icon weights to dynamically added elements
+const iconObserver = new MutationObserver(mutations => {
+    const iconWeight = getThemeIconWeight();
+
+    mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) { // ELEMENT_NODE
+                if (node.tagName === 'I' && node.className.includes('ph-')) {
+                    if(!node.classList.contains('ph-fill') || dashSettings.themeStyle === 'material') {
+                        node.classList.remove('ph-thin', 'ph-light', 'ph-regular', 'ph-bold', 'ph-fill', 'ph-duotone');
+                        node.classList.add(iconWeight);
+                    }
+                }
+                // Check children as well
+                node.querySelectorAll('i[class*="ph-"]').forEach(icon => {
+                    if(!icon.classList.contains('ph-fill') || dashSettings.themeStyle === 'material') {
+                        icon.classList.remove('ph-thin', 'ph-light', 'ph-regular', 'ph-bold', 'ph-fill', 'ph-duotone');
+                        icon.classList.add(iconWeight);
+                    }
+                });
+            }
+        });
+    });
+});
+iconObserver.observe(document.body, { childList: true, subtree: true });
 
 function applyLayoutVisibility() {
     const map = { search: 'mod-search', time: 'mod-time', tasks: 'mod-tasks', torn: 'mod-torn', bank: 'mod-bank-apps', weather: 'mod-weather', calendar: 'mod-calendar', shortcuts: 'mod-shortcuts', notepad: 'mod-notepad', news: 'mod-news' };
