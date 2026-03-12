@@ -434,8 +434,9 @@ function renderBankApps() {
     
     if (bankAppsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px; grid-column: span 2;">No tools added.</div>'; triggerMasonryUpdate(); return; }
     
+    let html = '';
     bankAppsArr.forEach((app, i) => {
-        grid.innerHTML += `
+        html += `
             <div class="bank-app-wrapper" draggable="true" ondragstart="handleSubDragStart(event, 'bank')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'bank', bankAppsArr, saveBankApps, renderBankApps)" ondragend="handleSubDragEnd(event)">
                 <a href="${app.path}" target="_blank" class="app-tile">
                     <i class="ph-fill ${app.icon}"></i>
@@ -444,6 +445,7 @@ function renderBankApps() {
                 <button class="delete-btn bank-del-btn" onclick="deleteBankApp(${i}, event)" title="Remove Tool">&times;</button>
             </div>`;
     });
+    grid.innerHTML = html;
     triggerMasonryUpdate();
 }
 
@@ -665,8 +667,9 @@ function renderTodos() {
     if(!list) return;
     list.innerHTML = currentList.length === 0 ? '<li style="text-align:center; color:var(--text-muted); padding: 30px 0; font-weight: 500;">All caught up!</li>' : '';
     
+    let html = list.innerHTML;
     currentList.forEach((t, i) => { 
-        list.innerHTML += `
+        html += `
         <li class="todo-item ${t.completed ? 'completed' : ''}" draggable="true" ondragstart="handleSubDragStart(event, 'task')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'task', todos['${activeTaskTab}'], saveTodos, renderTodos)" ondragend="handleSubDragEnd(event)">
             <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
             <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${i})">
@@ -674,6 +677,7 @@ function renderTodos() {
             <button class="delete-btn" onclick="deleteTodo(${i})" title="Delete task">&times;</button>
         </li>`; 
     });
+    list.innerHTML = html;
     triggerMasonryUpdate();
 }
 function addTodo() { 
@@ -878,14 +882,15 @@ function renderCalendar() {
 function renderHolidayList() {
     const list = document.getElementById('holiday-list'); 
     if(!list) return;
-    list.innerHTML = '';
     const now = new Date(); now.setHours(0,0,0,0);
     const up = holidaysData.filter(h => new Date(h.date) >= now);
     if (up.length === 0) { list.innerHTML = '<li class="holiday-item">No more holidays mapped for this year.</li>'; return; }
+    let html = '';
     up.slice(0, 5).forEach(h => {
         const diffDays = Math.ceil(Math.abs(new Date(h.date) - now) / 86400000);
-        list.innerHTML += `<li class="holiday-item"><span class="holiday-name">${escapeHtml(h.name)}</span><div class="holiday-meta"><span class="holiday-countdown">${diffDays === 0 ? "Today" : `in ${diffDays}d`}</span><span class="holiday-date">${new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span></div></li>`;
+        html += `<li class="holiday-item"><span class="holiday-name">${escapeHtml(h.name)}</span><div class="holiday-meta"><span class="holiday-countdown">${diffDays === 0 ? "Today" : `in ${diffDays}d`}</span><span class="holiday-date">${new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span></div></li>`;
     });
+    list.innerHTML = html;
 }
 
 function escapeHtml(u) { return (u || '').replace(/[&<"'>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]); }
@@ -903,13 +908,15 @@ function saveShortcuts() { localStorage.setItem('dashboardBookmarks', JSON.strin
 function renderShortcuts() {
     const grid = document.getElementById('shortcuts-grid'); 
     if(!grid) return;
-    grid.innerHTML = '';
+
     if (shortcutsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">No links added yet.</div>'; triggerMasonryUpdate(); return; }
+
+    let html = '';
     shortcutsArr.forEach((sc, i) => {
         let domain = sc.path.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
         let favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
         let onErrorFallback = `this.outerHTML='<i class=\\'ph-fill ph-globe shortcut-fallback-icon\\'></i>'`;
-        grid.innerHTML += `
+        html += `
             <div class="shortcut-item" draggable="true" ondragstart="handleSubDragStart(event, 'link')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'link', shortcutsArr, saveShortcuts, renderShortcuts)" ondragend="handleSubDragEnd(event)">
                 <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
                 <a href="${sc.path}" target="_blank" style="display:flex; align-items:center; gap:8px; flex-grow:1; text-decoration:none; color:inherit;">
@@ -919,6 +926,7 @@ function renderShortcuts() {
                 <button class="delete-btn" onclick="deleteShortcut(${i}, event)" title="Remove Link">&times;</button>
             </div>`;
     });
+    grid.innerHTML = html;
     triggerMasonryUpdate();
 }
 function addShortcut() {
@@ -956,16 +964,17 @@ function renderNotesList() {
     const searchEl = document.getElementById('note-search');
     if(!list || !searchEl) return;
     
-    const searchQ = searchEl.value.toLowerCase(); list.innerHTML = '';
+    const searchQ = searchEl.value.toLowerCase();
     let filteredNotes = searchQ ? notesArr.filter(n => n.title.toLowerCase().includes(searchQ) || n.content.toLowerCase().includes(searchQ)) : notesArr;
     if (filteredNotes.length === 0) { list.innerHTML = `<div class="loading">${searchQ ? 'No matches found.' : 'No notes yet. Click + to create.'}</div>`; triggerMasonryUpdate(); return; }
 
+    let html = "";
     [...filteredNotes].sort((a, b) => { if(a.pinned === b.pinned) return b.lastEdited - a.lastEdited; return a.pinned ? -1 : 1; }).forEach(note => {
         const diffMins = Math.floor((Date.now() - note.lastEdited) / 60000);
         let dateStr = diffMins < 1 ? "Just now" : diffMins < 60 ? `${diffMins}m` : diffMins < 1440 ? `${Math.floor(diffMins/60)}h` : new Date(note.lastEdited).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const pinClass = note.pinned ? 'pinned' : ''; const pinIcon = note.pinned ? 'ph-fill ph-push-pin' : 'ph ph-push-pin';
         
-        list.innerHTML += `
+        html += `
             <div class="note-item color-${note.color} ${pinClass}" onclick="openNote(${note.id})">
                 <div class="note-item-content">
                     <div class="note-title">${escapeHtml(note.title.trim() || "Untitled")}</div>
@@ -978,6 +987,7 @@ function renderNotesList() {
                 <button class="note-delete-btn" onclick="deleteNote(${note.id}, event)" title="Delete">&times;</button>
             </div>`;
     });
+    list.innerHTML = html;
     triggerMasonryUpdate();
 }
 
