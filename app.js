@@ -221,19 +221,24 @@ function saveSettings() {
     }
 }
 
+const STORAGE_KEYS = {
+    todos: 'dashboardTodos',
+    bookmarks: 'dashboardBookmarks',
+    notes: 'dashboardNotes',
+    layout: 'dashboardLayout',
+    settings: 'dashSettings',
+    theme: 'dashboardTheme',
+    holiday: 'holidayState',
+    weather: 'weatherCardState',
+    tornConfig: 'dashboardTornTracker',
+    bankApps: 'dashboardBankApps'
+};
+
 function exportData() {
-    const data = {
-        todos: localStorage.getItem('dashboardTodos'), 
-        bookmarks: localStorage.getItem('dashboardBookmarks'),
-        notes: localStorage.getItem('dashboardNotes'), 
-        layout: localStorage.getItem('dashboardLayout'),
-        settings: localStorage.getItem('dashSettings'), 
-        theme: localStorage.getItem('dashboardTheme'),
-        holiday: localStorage.getItem('holidayState'), 
-        weather: localStorage.getItem('weatherCardState'),
-        tornConfig: localStorage.getItem('dashboardTornTracker'),
-        bankApps: localStorage.getItem('dashboardBankApps')
-    };
+    const data = Object.entries(STORAGE_KEYS).reduce((acc, [key, storageKey]) => {
+        acc[key] = localStorage.getItem(storageKey);
+        return acc;
+    }, {});
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = `dashboard_backup_${Date.now()}.json`;
@@ -247,16 +252,9 @@ function importData(event) {
     reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if(data.todos) localStorage.setItem('dashboardTodos', data.todos);
-            if(data.bookmarks) localStorage.setItem('dashboardBookmarks', data.bookmarks);
-            if(data.notes) localStorage.setItem('dashboardNotes', data.notes);
-            if(data.layout) localStorage.setItem('dashboardLayout', data.layout);
-            if(data.settings) localStorage.setItem('dashSettings', data.settings);
-            if(data.theme) localStorage.setItem('dashboardTheme', data.theme);
-            if(data.holiday) localStorage.setItem('holidayState', data.holiday);
-            if(data.weather) localStorage.setItem('weatherCardState', data.weather);
-            if(data.tornConfig) localStorage.setItem('dashboardTornTracker', data.tornConfig);
-            if(data.bankApps) localStorage.setItem('dashboardBankApps', data.bankApps);
+            Object.entries(STORAGE_KEYS).forEach(([key, storageKey]) => {
+                if (data[key]) localStorage.setItem(storageKey, data[key]);
+            });
             alert("Backup restored! Reloading..."); location.reload();
         } catch(err) { alert("Invalid backup file."); }
     };
