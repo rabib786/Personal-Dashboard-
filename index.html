@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Daily Dashboard</title>
-    
+
     <link rel="manifest" href="manifest.json">
-    
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
                 <h2><i class="ph ph-sliders"></i> Settings</h2>
                 <button class="modal-close" onclick="closeSettings()"><i class="ph ph-x"></i></button>
             </div>
-            
+
             <div class="form-group">
                 <label>Your Name</label>
                 <input type="text" id="set-name" class="form-control" placeholder="e.g. Steve">
@@ -46,7 +46,7 @@
 
             <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
                 <label><i class="ph-fill ph-paint-brush" style="margin-right: 5px;"></i> Visual Themes</label>
-                
+
                 <div style="margin-bottom: 15px;">
                     <span class="toggle-label" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">Theme Engine</span>
                     <select id="set-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;">
@@ -118,6 +118,17 @@
                 </div>
             </div>
 
+            <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label><i class="ph-fill ph-cloud" style="margin-right: 5px;"></i> Cloud Sync (GitHub Gist)</label>
+                <input type="password" id="set-gist-pat" class="form-control" placeholder="GitHub Personal Access Token" style="margin-bottom: 10px;">
+                <input type="text" id="set-gist-id" class="form-control" placeholder="Gist ID (Leave blank to create new)" style="margin-bottom: 10px;">
+                <div class="backup-row">
+                    <div class="backup-btn" onclick="uploadToGist()" id="btn-gist-up"><i class="ph ph-cloud-arrow-up"></i> Sync to Cloud</div>
+                    <div class="backup-btn" onclick="downloadFromGist()" id="btn-gist-down"><i class="ph ph-cloud-arrow-down"></i> Load from Cloud</div>
+                </div>
+                <div id="gist-sync-status" style="font-size: 0.75rem; margin-top: 8px; text-align: center; color: var(--text-muted);"></div>
+            </div>
+
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
                 <button class="btn-primary" onclick="saveSettings()">Save Changes</button>
@@ -136,7 +147,7 @@
             </select>
             <input type="text" id="universal-search" class="search-input" placeholder="Search the web... (Press Alt+S)" onkeypress="executeSearch(event)">
         </div>
-        
+
         <div class="card" id="mod-time">
             <div class="time-drag-wrap">
                 <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
@@ -172,7 +183,7 @@
                 </div>
                 <button class="btn-clean" onclick="clearCompletedTodos()">Clear Done</button>
             </div>
-            
+
             <div class="news-tabs" style="margin-bottom: 15px;">
                 <div class="news-tab active" id="task-tab-work" onclick="switchTaskTab('work')">Work</div>
                 <div class="news-tab" id="task-tab-personal" onclick="switchTaskTab('personal')">Personal</div>
@@ -194,7 +205,7 @@
                 </div>
                 <button class="icon-btn" onclick="toggleTornConfig()" title="Configure API Key"><i class="ph ph-gear"></i></button>
             </div>
-            
+
             <div id="torn-display-view" class="torn-display">
                 <div class="torn-profile">
                     <div class="torn-name" id="torn-profile-name">Connecting...</div>
@@ -255,7 +266,7 @@
                 </div>
                 <button class="icon-btn" onclick="toggleBankAppInputs()" title="Add Local App"><i class="ph ph-plus"></i></button>
             </div>
-            
+
             <div id="bank-app-inputs-container" class="shortcuts-inputs" style="display: none;">
                 <input type="text" id="ba-name" class="shortcut-input" placeholder="App Name (e.g. Calculators)">
                 <input type="text" id="ba-icon" class="shortcut-input" placeholder="Icon Class (e.g. ph-calculator)">
@@ -301,7 +312,7 @@
                 <button class="calendar-nav-btn" onclick="changeMonth(1)" title="Next Month">&#9654;</button>
             </div>
             <div id="mini-calendar"></div>
-            
+
             <div class="collapsible-header" onclick="toggleSection('holiday-list', 'holiday-chevron', 'holidayState')" title="Toggle Holidays">
                 <h3 style="font-size: 0.8rem; margin: 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Upcoming Holidays</h3>
                 <i id="holiday-chevron" class="ph ph-caret-down chevron"></i>
@@ -317,7 +328,7 @@
                 </div>
                 <button class="icon-btn" onclick="toggleShortcutInputs()" title="Add New Link"><i class="ph ph-plus"></i></button>
             </div>
-            
+
             <div id="shortcut-inputs-container" class="shortcuts-inputs" style="display: none;">
                 <input type="text" id="sc-name" class="shortcut-input" placeholder="Site Name (e.g. Reddit)">
                 <input type="text" id="sc-path" class="shortcut-input" placeholder="URL (e.g. reddit.com)" onkeypress="handleShortcutKeyPress(event)">
@@ -326,7 +337,7 @@
                     <button class="btn-clean" style="flex: 1;" onclick="toggleShortcutInputs()">Cancel</button>
                 </div>
             </div>
-            
+
             <div id="shortcuts-grid" class="shortcuts-grid"></div>
         </div>
 
@@ -361,7 +372,7 @@
                         <span class="color-dot bg-red" id="c-red" onclick="setNoteColor('red')" title="Red"></span>
                     </div>
                 </div>
-                
+
                 <div class="editor-container">
                     <textarea id="notepad-input" placeholder="Write your note here...&#10;Auto-saves instantly."></textarea>
                 </div>
@@ -381,7 +392,7 @@
                 </div>
                 <button id="news-refresh-btn" class="icon-btn" onclick="refreshCurrentNews()" title="Force Refresh News"><i class="ph ph-arrows-clockwise"></i></button>
             </div>
-            
+
             <div class="news-tabs">
                 <div class="news-tab active" id="tab-dailystar" onclick="fetchNews('dailystar')">The Daily Star</div>
                 <div class="news-tab" id="tab-prothomalo" onclick="fetchNews('prothomalo')">Prothom Alo</div>

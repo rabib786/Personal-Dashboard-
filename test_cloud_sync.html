@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Cloud Sync</title>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="settings-modal" class="modal-overlay active">
+      <div class="modal-content">
+          <div class="form-group">
+                <label><i class="ph-fill ph-cloud" style="margin-right: 5px;"></i> Cloud Sync (GitHub Gist)</label>
+                <input type="password" id="set-gist-pat" class="form-control" placeholder="GitHub Personal Access Token" style="margin-bottom: 10px;">
+                <input type="text" id="set-gist-id" class="form-control" placeholder="Gist ID (Leave blank to create new)" style="margin-bottom: 10px;">
+                <div class="backup-row">
+                    <div class="backup-btn" onclick="uploadToGist()" id="btn-gist-up"><i class="ph ph-cloud-arrow-up"></i> Sync to Cloud</div>
+                    <div class="backup-btn" onclick="downloadFromGist()" id="btn-gist-down"><i class="ph ph-cloud-arrow-down"></i> Load from Cloud</div>
+                </div>
+                <div id="gist-sync-status" style="font-size: 0.75rem; margin-top: 8px; text-align: center; color: var(--text-muted);"></div>
+            </div>
+      </div>
+  </div>
+  <script>
+    const STORAGE_KEYS = { todos: 'dashboardTodos' };
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
