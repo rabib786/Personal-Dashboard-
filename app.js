@@ -612,78 +612,84 @@ function renderTornStats(data) {
     const frag = document.createDocumentFragment();
     const formatNum = (num) => typeof num === 'number' ? num.toLocaleString('en-US') : (num || '--');
 
-    const addHeader = (title, iconClass) => {
-        const header = document.createElement('div');
-        header.style.gridColumn = "span 2";
-        header.style.display = "flex";
-        header.style.alignItems = "center";
-        header.style.gap = "6px";
-        header.style.marginTop = frag.childNodes.length > 0 ? "10px" : "0";
-        header.style.marginBottom = "5px";
-        header.style.color = "var(--text-muted)";
-        header.style.fontSize = "0.75rem";
-        header.style.fontWeight = "800";
-        header.style.textTransform = "uppercase";
-        header.style.letterSpacing = "1px";
-        header.style.borderBottom = "1px solid var(--glass-border)";
-        header.style.paddingBottom = "4px";
+    // Helper for creating micro-card rows
+    const createRow = (labelStr, valStr) => {
+        const row = document.createElement('div');
+        row.className = 'torn-mc-row';
 
-        if(iconClass) {
-            const i = document.createElement('i');
-            i.className = iconClass;
-            i.style.fontSize = "1rem";
-            header.appendChild(i);
-        }
-
-        const txt = document.createElement('span');
-        txt.textContent = title;
-        header.appendChild(txt);
-        frag.appendChild(header);
-    };
-
-    const addStat = (labelStr, valStr, highlight = false) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'stat-item';
         const label = document.createElement('span');
-        label.className = 'stat-label';
+        label.className = 'torn-mc-label';
         label.textContent = labelStr;
+
+        const dots = document.createElement('div');
+        dots.className = 'torn-mc-dots';
+
         const val = document.createElement('span');
-        val.className = 'stat-val';
-        if (highlight) {
-            val.style.color = "var(--accent)";
-            val.style.fontWeight = "900";
-        }
+        val.className = 'torn-mc-val';
         val.textContent = valStr;
-        wrapper.appendChild(label);
-        wrapper.appendChild(val);
-        frag.appendChild(wrapper);
+
+        row.appendChild(label);
+        row.appendChild(dots);
+        row.appendChild(val);
+        return row;
     };
 
-    // --- GENERAL ---
+    // --- GENERAL & ASSETS (PILLS) ---
     let hasPoints = data.points !== undefined;
     let hasJp = (data.jobpoints && (data.jobpoints.jobs || data.jobpoints.companies));
 
     if (hasPoints || hasJp) {
-        addHeader('General & Assets', 'ph-fill ph-coins');
-        if (hasPoints) addStat('Points', formatNum(data.points), true);
+        const pillsContainer = document.createElement('div');
+        pillsContainer.className = 'torn-stats-pills';
+
+        if (hasPoints) {
+            const pill = document.createElement('div');
+            pill.className = 'torn-stat-pill';
+            pill.innerHTML = `Points: <span>${formatNum(data.points)}</span>`;
+            pillsContainer.appendChild(pill);
+        }
         if (hasJp) {
             let totalJp = 0;
-            if(data.jobpoints.jobs) for (let jp in data.jobpoints.jobs) totalJp += data.jobpoints.jobs[jp];
-            if(data.jobpoints.companies) for (let cp in data.jobpoints.companies) totalJp += data.jobpoints.companies[cp];
-            addStat('Job Points', formatNum(totalJp));
+            if (data.jobpoints.jobs) Object.values(data.jobpoints.jobs).forEach(v => totalJp += v);
+            if (data.jobpoints.companies) Object.values(data.jobpoints.companies).forEach(v => totalJp += v);
+
+            const pill = document.createElement('div');
+            pill.className = 'torn-stat-pill';
+            pill.innerHTML = `Job Points: <span>${formatNum(totalJp)}</span>`;
+            pillsContainer.appendChild(pill);
         }
+        frag.appendChild(pillsContainer);
     }
 
-    // --- WORKING STATS ---
+    // --- GRID LAYOUT ---
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'torn-stats-grid';
+
+    // Column 1: Working Stats
+    const col1 = document.createElement('div');
+    col1.className = 'torn-stats-col';
+
     let hasWork = data.manual_labor !== undefined || data.intelligence !== undefined || data.endurance !== undefined;
     if (hasWork) {
-        addHeader('Working Stats', 'ph-fill ph-wrench');
-        if (data.manual_labor !== undefined) addStat('Manual Labor', formatNum(data.manual_labor));
-        if (data.intelligence !== undefined) addStat('Intelligence', formatNum(data.intelligence));
-        if (data.endurance !== undefined) addStat('Endurance', formatNum(data.endurance));
+        const workCard = document.createElement('div');
+        workCard.className = 'torn-micro-card';
+
+        const header = document.createElement('div');
+        header.className = 'torn-mc-header';
+        header.innerHTML = '<i class="ph-fill ph-wrench"></i> Working Stats';
+        workCard.appendChild(header);
+
+        if (data.manual_labor !== undefined) workCard.appendChild(createRow('Manual Labor', formatNum(data.manual_labor)));
+        if (data.intelligence !== undefined) workCard.appendChild(createRow('Intelligence', formatNum(data.intelligence)));
+        if (data.endurance !== undefined) workCard.appendChild(createRow('Endurance', formatNum(data.endurance)));
+
+        col1.appendChild(workCard);
     }
 
-    // --- BATTLE STATS (Effective Values) ---
+    // Column 2: Battle Stats
+    const col2 = document.createElement('div');
+    col2.className = 'torn-stats-col';
+
     let str = data.strength || (data.strength_info ? data.strength_info.effective : undefined);
     let def = data.defense || (data.defense_info ? data.defense_info.effective : undefined);
     let spd = data.speed || (data.speed_info ? data.speed_info.effective : undefined);
@@ -691,50 +697,52 @@ function renderTornStats(data) {
 
     let hasBattle = str !== undefined || def !== undefined || spd !== undefined || dex !== undefined || data.total_stats !== undefined;
     if (hasBattle) {
-        addHeader('Battle Stats (Effective)', 'ph-fill ph-sword');
-        if (str !== undefined) addStat('Strength', formatNum(str));
-        if (def !== undefined) addStat('Defense', formatNum(def));
-        if (spd !== undefined) addStat('Speed', formatNum(spd));
-        if (dex !== undefined) addStat('Dexterity', formatNum(dex));
+        const battleCard = document.createElement('div');
+        battleCard.className = 'torn-micro-card';
+
+        const header = document.createElement('div');
+        header.className = 'torn-mc-header';
+        header.innerHTML = '<i class="ph-fill ph-sword"></i> Battle Stats';
+        battleCard.appendChild(header);
+
+        if (str !== undefined) battleCard.appendChild(createRow('Strength', formatNum(str)));
+        if (def !== undefined) battleCard.appendChild(createRow('Defense', formatNum(def)));
+        if (spd !== undefined) battleCard.appendChild(createRow('Speed', formatNum(spd)));
+        if (dex !== undefined) battleCard.appendChild(createRow('Dexterity', formatNum(dex)));
 
         let totalStat = data.total_stats;
         if (totalStat === undefined && str !== undefined && def !== undefined && spd !== undefined && dex !== undefined) {
              totalStat = str + def + spd + dex;
         }
+
         if (totalStat !== undefined) {
-            const wrapper = document.createElement('div');
-            wrapper.style.gridColumn = "span 2";
-            wrapper.style.display = "flex";
-            wrapper.style.justifyContent = "space-between";
-            wrapper.style.alignItems = "center";
-            wrapper.style.background = "var(--glass-bg)";
-            wrapper.style.padding = "8px 12px";
-            wrapper.style.borderRadius = "12px";
-            wrapper.style.marginTop = "5px";
-            wrapper.style.border = "1px solid var(--accent)";
+            const totalRow = document.createElement('div');
+            totalRow.className = 'torn-mc-total';
 
-            const label = document.createElement('span');
-            label.style.fontSize = "0.75rem";
-            label.style.fontWeight = "800";
-            label.style.textTransform = "uppercase";
-            label.style.color = "var(--text-muted)";
-            label.textContent = "Total Stats";
+            const tLabel = document.createElement('span');
+            tLabel.className = 'torn-mc-total-label';
+            tLabel.textContent = 'Total';
 
-            const val = document.createElement('span');
-            val.style.fontSize = "1.1rem";
-            val.style.fontWeight = "900";
-            val.style.color = "var(--accent)";
-            val.textContent = formatNum(totalStat);
+            const tVal = document.createElement('span');
+            tVal.className = 'torn-mc-total-val';
+            tVal.textContent = formatNum(totalStat);
 
-            wrapper.appendChild(label);
-            wrapper.appendChild(val);
-            frag.appendChild(wrapper);
+            totalRow.appendChild(tLabel);
+            totalRow.appendChild(tVal);
+            battleCard.appendChild(totalRow);
         }
+
+        col2.appendChild(battleCard);
+    }
+
+    if (hasWork || hasBattle) {
+        gridContainer.appendChild(col1);
+        gridContainer.appendChild(col2);
+        frag.appendChild(gridContainer);
     }
 
     if(frag.childNodes.length === 0) {
         const noStats = document.createElement('div');
-        noStats.style.gridColumn = "span 2";
         noStats.style.textAlign = "center";
         noStats.style.color = "var(--text-muted)";
         noStats.style.fontSize = "0.85rem";

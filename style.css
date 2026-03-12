@@ -179,6 +179,24 @@ input, textarea, select, button { font-family: inherit; }
 .torn-cd i { font-size: 1.3rem; }
 .api-config { display: flex; flex-direction: column; gap: 10px; }
 
+/* --- TORN MORE STATS REDESIGN --- */
+.torn-stats-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; width: 100%; }
+.torn-stat-pill { background: var(--inner-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 6px 12px; font-size: 0.8rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.torn-stat-pill span { color: var(--accent); font-weight: 800; }
+.torn-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+.torn-stats-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.torn-micro-card { background: var(--inner-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+.torn-mc-header { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--glass-border); padding-bottom: 6px; margin-bottom: 2px; }
+.torn-mc-header i { font-size: 1rem; }
+.torn-mc-row { display: flex; justify-content: space-between; align-items: baseline; width: 100%; }
+.torn-mc-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; white-space: nowrap; }
+.torn-mc-dots { flex-grow: 1; border-bottom: 1px dotted var(--glass-border); margin: 0 6px; position: relative; top: -4px; opacity: 0.6; }
+.torn-mc-val { font-size: 0.9rem; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.torn-mc-total { margin-top: 2px; padding: 8px 10px; border-radius: 6px; background: linear-gradient(90deg, var(--glass-border), transparent); display: flex; justify-content: space-between; align-items: baseline; border-left: 2px solid var(--accent); }
+.torn-mc-total-label { font-size: 0.75rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
+.torn-mc-total-val { font-size: 1.05rem; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+
 /* --- CUSTOM BANK APPS MODULE --- */
 .bank-apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
 .bank-app-wrapper { position: relative; display: flex; flex-direction: column; }
