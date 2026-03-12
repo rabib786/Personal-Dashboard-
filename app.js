@@ -231,7 +231,8 @@ const STORAGE_KEYS = {
     holiday: 'holidayState',
     weather: 'weatherCardState',
     tornConfig: 'dashboardTornTracker',
-    bankApps: 'dashboardBankApps'
+    bankApps: 'dashboardBankApps',
+    tornStats: 'tornStatsState'
 };
 
 function exportData() {
@@ -402,6 +403,13 @@ function initDashboard() {
     applyLayoutVisibility();
 
     if (localStorage.getItem('holidayState') === 'open') { document.getElementById('holiday-list').style.display = 'block'; document.getElementById('holiday-chevron').classList.add('open'); }
+
+    if (localStorage.getItem('tornStatsState') === 'open') {
+        const tsv = document.getElementById('torn-stats-view');
+        const tsc = document.getElementById('torn-stats-chevron');
+        if(tsv && tsc) { tsv.style.display = 'grid'; tsc.classList.add('open'); }
+    }
+
     initCustomRssTab();
     triggerMasonryUpdate(); startClock(); fetchWeatherForCity(); initTornTracker();
     loadBDHolidays(new Date().getFullYear()); fetchNews('dailystar'); renderTodos(); initNotesEngine(); initShortcutsEngine(); initDragAndDrop(); initBankApps();
@@ -532,7 +540,7 @@ async function fetchTornData() {
     if(!tornConfig.key) return;
 
     try {
-        const response = await fetch(`https://api.torn.com/user/?selections=bars,profile,cooldowns,money&key=${tornConfig.key}`);
+        const response = await fetch(`https://api.torn.com/user/?selections=bars,profile,cooldowns,travel,money&key=${tornConfig.key}`);
         if(!response.ok) throw new Error("Fetch failed");
         const data = await response.json();
 
@@ -562,15 +570,31 @@ async function fetchTornData() {
 
         // Save Timers for Local Ticking
         const now = Date.now();
+
+        let travelUntil = 0;
+        if (data.travel && data.travel.time_left > 0) {
+            travelUntil = now + data.travel.time_left * 1000;
+        } else if (data.status && data.status.until > 0) {
+            travelUntil = data.status.until * 1000;
+        }
+
         tornTimers = {
             enFull: now + data.energy.fulltime * 1000,
+            enTick: data.energy.ticktime ? now + data.energy.ticktime * 1000 : 0,
             neFull: now + data.nerve.fulltime * 1000,
+            neTick: data.nerve.ticktime ? now + data.nerve.ticktime * 1000 : 0,
             haFull: now + data.happy.fulltime * 1000,
+            haTick: data.happy.ticktime ? now + data.happy.ticktime * 1000 : 0,
             liFull: now + data.life.fulltime * 1000,
+            liTick: data.life.ticktime ? now + data.life.ticktime * 1000 : 0,
             medCd: now + data.cooldowns.medical * 1000,
             drugCd: now + data.cooldowns.drug * 1000,
-            booCd: now + data.cooldowns.booster * 1000
+            booCd: now + data.cooldowns.booster * 1000,
+            travel: travelUntil
         };
+
+        // Render Dynamic Stats
+        renderTornStats(data);
 
         updateTornTimersUI();
         triggerMasonryUpdate();
@@ -578,6 +602,55 @@ async function fetchTornData() {
     } catch (e) {
         console.error("Failed to fetch Torn data", e);
     }
+}
+
+function renderTornStats(data) {
+    const statsView = document.getElementById('torn-stats-view');
+    if (!statsView) return;
+    statsView.innerHTML = '';
+
+    const ignoredKeys = ['player_id', 'name', 'level', 'status', 'icons', 'cooldowns', 'bars', 'money_onhand', 'travel'];
+    const formatLabel = (str) => str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+    const frag = document.createDocumentFragment();
+
+    for (let key in data) {
+        if (ignoredKeys.includes(key)) continue;
+        if (typeof data[key] !== 'object' && typeof data[key] !== 'function') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'stat-item';
+
+            const label = document.createElement('span');
+            label.className = 'stat-label';
+            label.textContent = formatLabel(key);
+
+            const val = document.createElement('span');
+            val.className = 'stat-val';
+
+            // Format numbers nicely if possible
+            if (typeof data[key] === 'number') {
+                val.textContent = data[key].toLocaleString('en-US');
+            } else {
+                val.textContent = data[key] !== '' ? data[key] : '--';
+            }
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(val);
+            frag.appendChild(wrapper);
+        }
+    }
+
+    if(frag.childNodes.length === 0) {
+        const noStats = document.createElement('div');
+        noStats.style.gridColumn = "span 2";
+        noStats.style.textAlign = "center";
+        noStats.style.color = "var(--text-muted)";
+        noStats.style.fontSize = "0.85rem";
+        noStats.textContent = "No basic stats found.";
+        frag.appendChild(noStats);
+    }
+
+    statsView.appendChild(frag);
 }
 
 function updateTornBar(prefix, barData) {
@@ -597,15 +670,30 @@ function updateTornTimersUI() {
 
     const now = Date.now();
 
-    const fmtFull = (target) => {
-        let s = Math.floor((target - now) / 1000);
+    const formatSeconds = (s) => {
         if(s <= 0) return '';
         let h = Math.floor(s / 3600);
         let m = Math.floor((s % 3600) / 60);
         let sec = s % 60;
-        if (h > 0) return `(Full in ${h}h ${m}m)`;
-        if (m > 0) return `(Full in ${m}m ${sec}s)`;
-        return `(Full in ${sec}s)`;
+        if (h > 0) return `${h}h ${m}m`;
+        if (m > 0) return `${m}m ${sec}s`;
+        return `${sec}s`;
+    };
+
+    const fmtFull = (tickTarget, fullTarget) => {
+        let tickStr = '';
+        if (tickTarget && tickTarget > now) {
+            tickStr = formatSeconds(Math.floor((tickTarget - now) / 1000));
+        }
+
+        let fullStr = '';
+        if (fullTarget && fullTarget > now) {
+            fullStr = formatSeconds(Math.floor((fullTarget - now) / 1000));
+        }
+
+        if (tickStr && fullStr) return `(Next in ${tickStr} | Full in ${fullStr})`;
+        if (fullStr) return `(Full in ${fullStr})`;
+        return '';
     };
 
     const fmtCd = (target, elId) => {
@@ -620,18 +708,41 @@ function updateTornTimersUI() {
         let h = Math.floor(s / 3600).toString().padStart(2, '0');
         let m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
         let sec = (s % 60).toString().padStart(2, '0');
-        el.innerText = `${h}:${m}:${sec}`;
+        el.innerText = `(In ${h}:${m}:${sec})`;
         el.style.color = 'var(--danger)';
     };
 
-    const en = document.getElementById('torn-en-full'); if(en) en.innerText = fmtFull(tornTimers.enFull);
-    const ne = document.getElementById('torn-ne-full'); if(ne) ne.innerText = fmtFull(tornTimers.neFull);
-    const ha = document.getElementById('torn-ha-full'); if(ha) ha.innerText = fmtFull(tornTimers.haFull);
-    const li = document.getElementById('torn-li-full'); if(li) li.innerText = fmtFull(tornTimers.liFull);
+    const en = document.getElementById('torn-en-full'); if(en) en.innerText = fmtFull(tornTimers.enTick, tornTimers.enFull);
+    const ne = document.getElementById('torn-ne-full'); if(ne) ne.innerText = fmtFull(tornTimers.neTick, tornTimers.neFull);
+    const ha = document.getElementById('torn-ha-full'); if(ha) ha.innerText = fmtFull(tornTimers.haTick, tornTimers.haFull);
+    const li = document.getElementById('torn-li-full'); if(li) li.innerText = fmtFull(tornTimers.liTick, tornTimers.liFull);
 
     fmtCd(tornTimers.medCd, 'torn-cd-med');
     fmtCd(tornTimers.drugCd, 'torn-cd-drug');
     fmtCd(tornTimers.booCd, 'torn-cd-boo');
+
+    const ps = document.getElementById('torn-profile-status');
+    if (ps && tornTimers.travel > now) {
+        let s = Math.floor((tornTimers.travel - now) / 1000);
+        let h = Math.floor(s / 3600).toString().padStart(2, '0');
+        let m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+        let sec = (s % 60).toString().padStart(2, '0');
+
+        let originalText = ps.getAttribute('data-original-status') || ps.innerText;
+        if (!ps.hasAttribute('data-original-status')) {
+            ps.setAttribute('data-original-status', originalText);
+        }
+
+        let destinationText = originalText;
+        if (destinationText.includes('Traveling')) {
+             destinationText = destinationText.replace(/\s*\[.*?\]\s*/, ' ');
+        }
+
+        ps.innerText = `${destinationText.trim()} [${h}:${m}:${sec}]`;
+    } else if (ps && ps.hasAttribute('data-original-status')) {
+        ps.innerText = ps.getAttribute('data-original-status');
+        ps.removeAttribute('data-original-status');
+    }
 }
 
 
