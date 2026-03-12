@@ -42,7 +42,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]):not([data-theme-style="cyberpunk"]):not([data-theme-style="terminal"]):not([data-theme-style="pixel"]) {
+    :root:not([data-theme="light"]):not([data-theme-style="cyberpunk"]):not([data-theme-style="terminal"]):not([data-theme-style="pixel"]):not([data-theme-style="brutalism"]):not([data-theme-style="e-ink"]):not([data-theme-style="material"]) {
         --glass-opacity: 0.65; 
         --glass-bg: rgba(20, 20, 25, var(--glass-opacity));
         --glass-border: rgba(255, 255, 255, 0.08);
@@ -539,4 +539,175 @@ input, textarea, select, button { font-family: inherit; }
 [data-theme-style="pixel"] .action-btn:active {
     border-color: #000000 #ffffff #ffffff #000000;
     transform: translate(1px, 1px) !important;
+}
+/* --- THEME 4: NEO-BRUTALISM --- */
+[data-theme-style="brutalism"] {
+    --glass-opacity: 1;
+    --glass-blur: 0px;
+    --glass-bg: #ffffff;
+    --glass-border: #000000;
+    --glass-shadow: 6px 6px 0px #000000;
+    --text-main: #000000;
+    --text-muted: #333333;
+    --inner-bg: #f4f4f4;
+    --modal-bg: #ffffff;
+    --main-font: 'Space Grotesk', sans-serif;
+    --border-radius: 0px;
+}
+[data-theme-style="brutalism"] body {
+    background: #ffdb58 !important; /* Bright mustard yellow */
+}
+[data-theme-style="brutalism"] .card,
+[data-theme-style="brutalism"] .modal-content {
+    border: 3px solid #000000;
+    box-shadow: 6px 6px 0px #000000;
+}
+[data-theme-style="brutalism"] .card:hover:not(.dragging) {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0px #000000;
+}
+[data-theme-style="brutalism"] input,
+[data-theme-style="brutalism"] select,
+[data-theme-style="brutalism"] .form-control,
+[data-theme-style="brutalism"] .app-tile,
+[data-theme-style="brutalism"] .news-item {
+    border: 3px solid #000000;
+    background: #ffffff;
+}
+[data-theme-style="brutalism"] .fab-btn,
+[data-theme-style="brutalism"] .icon-btn,
+[data-theme-style="brutalism"] .action-btn,
+[data-theme-style="brutalism"] .btn-add,
+[data-theme-style="brutalism"] .btn-clean {
+    border: 3px solid #000000;
+    background: var(--accent);
+    color: #000000;
+    box-shadow: 4px 4px 0px #000000;
+    border-radius: 0;
+}
+[data-theme-style="brutalism"] .fab-btn:hover,
+[data-theme-style="brutalism"] .icon-btn:hover,
+[data-theme-style="brutalism"] .action-btn:hover,
+[data-theme-style="brutalism"] .btn-add:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #000000;
+}
+[data-theme-style="brutalism"] .fab-btn:active,
+[data-theme-style="brutalism"] .icon-btn:active,
+[data-theme-style="brutalism"] .action-btn:active,
+[data-theme-style="brutalism"] .btn-add:active {
+    transform: translate(4px, 4px) !important;
+    box-shadow: 0px 0px 0px #000000 !important;
+}
+
+/* --- THEME 5: DEEP SPACE / E-INK --- */
+[data-theme-style="e-ink"] {
+    --glass-opacity: 1;
+    --glass-blur: 0px;
+    --glass-bg: #000000;
+    --glass-border: #333333;
+    --glass-shadow: none;
+    --text-main: #ffffff;
+    --text-muted: #aaaaaa;
+    --inner-bg: #0a0a0a;
+    --modal-bg: #000000;
+    --main-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --border-radius: 4px;
+}
+[data-theme-style="e-ink"] body {
+    background: #000000 !important;
+}
+[data-theme-style="e-ink"] .card,
+[data-theme-style="e-ink"] .modal-content,
+[data-theme-style="e-ink"] input,
+[data-theme-style="e-ink"] select,
+[data-theme-style="e-ink"] .form-control,
+[data-theme-style="e-ink"] .app-tile,
+[data-theme-style="e-ink"] .news-item {
+    border: 1px solid #333333;
+    background: #000000;
+    box-shadow: none;
+}
+[data-theme-style="e-ink"] .card:hover:not(.dragging) {
+    border-color: #666666;
+    transform: none;
+    box-shadow: none;
+}
+[data-theme-style="e-ink"] .fab-btn,
+[data-theme-style="e-ink"] .icon-btn,
+[data-theme-style="e-ink"] .action-btn,
+[data-theme-style="e-ink"] .btn-add,
+[data-theme-style="e-ink"] .btn-clean {
+    border: 1px solid #ffffff;
+    background: #000000;
+    color: #ffffff;
+    box-shadow: none;
+}
+[data-theme-style="e-ink"] .fab-btn:hover,
+[data-theme-style="e-ink"] .icon-btn:hover,
+[data-theme-style="e-ink"] .action-btn:hover,
+[data-theme-style="e-ink"] .btn-add:hover {
+    background: #ffffff;
+    color: #000000;
+    transform: none;
+}
+
+/* --- THEME 6: MATERIAL YOU --- */
+[data-theme-style="material"] {
+    --glass-opacity: 1;
+    --glass-blur: 0px;
+    --glass-bg: #ffffff;
+    --glass-border: transparent;
+    --glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --text-main: #1f1f1f;
+    --text-muted: #5e5e5e;
+    --inner-bg: #f0f4f8; /* Soft pastel background */
+    --modal-bg: #ffffff;
+    --main-font: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    --border-radius: 32px;
+}
+[data-theme-style="material"] body {
+    background: #e8ecf1 !important; /* Soft grayish-blue */
+}
+[data-theme-style="material"] .card,
+[data-theme-style="material"] .modal-content {
+    border: none;
+    border-radius: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+[data-theme-style="material"] .card:hover:not(.dragging) {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+[data-theme-style="material"] input,
+[data-theme-style="material"] select,
+[data-theme-style="material"] .form-control {
+    border: none;
+    border-radius: 16px;
+    background: #e8ecf1;
+}
+[data-theme-style="material"] .app-tile,
+[data-theme-style="material"] .news-item {
+    border: none;
+    border-radius: 24px;
+    background: #f0f4f8;
+}
+[data-theme-style="material"] .fab-btn,
+[data-theme-style="material"] .icon-btn,
+[data-theme-style="material"] .action-btn,
+[data-theme-style="material"] .btn-add,
+[data-theme-style="material"] .btn-clean {
+    border: none;
+    border-radius: 50px; /* Fully pill-shaped */
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+[data-theme-style="material"] .fab-btn:hover,
+[data-theme-style="material"] .icon-btn:hover,
+[data-theme-style="material"] .action-btn:hover,
+[data-theme-style="material"] .btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    filter: brightness(1.1);
 }
