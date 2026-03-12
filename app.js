@@ -540,7 +540,7 @@ async function fetchTornData() {
     if(!tornConfig.key) return;
 
     try {
-        const response = await fetch(`https://api.torn.com/user/?selections=bars,profile,cooldowns,travel,money&key=${tornConfig.key}`);
+        const response = await fetch(`https://api.torn.com/user/?selections=bars,profile,cooldowns,travel,money,battlestats,workstats,jobpoints&key=${tornConfig.key}`);
         if(!response.ok) throw new Error("Fetch failed");
         const data = await response.json();
 
@@ -609,36 +609,56 @@ function renderTornStats(data) {
     if (!statsView) return;
     statsView.innerHTML = '';
 
-    const ignoredKeys = ['player_id', 'name', 'level', 'status', 'icons', 'cooldowns', 'bars', 'money_onhand', 'travel'];
-    const formatLabel = (str) => str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
     const frag = document.createDocumentFragment();
+    const formatNum = (num) => typeof num === 'number' ? num.toLocaleString('en-US') : (num || '--');
 
-    for (let key in data) {
-        if (ignoredKeys.includes(key)) continue;
-        if (typeof data[key] !== 'object' && typeof data[key] !== 'function') {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'stat-item';
+    const addStat = (labelStr, valStr, colorClass = '') => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'stat-item';
+        const label = document.createElement('span');
+        label.className = 'stat-label';
+        label.textContent = labelStr;
+        const val = document.createElement('span');
+        val.className = 'stat-val';
+        if (colorClass) val.classList.add(colorClass);
+        val.textContent = valStr;
+        wrapper.appendChild(label);
+        wrapper.appendChild(val);
+        frag.appendChild(wrapper);
+    };
 
-            const label = document.createElement('span');
-            label.className = 'stat-label';
-            label.textContent = formatLabel(key);
-
-            const val = document.createElement('span');
-            val.className = 'stat-val';
-
-            // Format numbers nicely if possible
-            if (typeof data[key] === 'number') {
-                val.textContent = data[key].toLocaleString('en-US');
-            } else {
-                val.textContent = data[key] !== '' ? data[key] : '--';
-            }
-
-            wrapper.appendChild(label);
-            wrapper.appendChild(val);
-            frag.appendChild(wrapper);
-        }
+    // --- POINTS & JOB POINTS ---
+    if (data.points !== undefined) addStat('Points', formatNum(data.points), 'color-accent');
+    if (data.jobpoints && data.jobpoints.jobs) {
+        let totalJp = 0;
+        for (let jp in data.jobpoints.jobs) totalJp += data.jobpoints.jobs[jp];
+        addStat('Job Points', formatNum(totalJp));
+    } else if (data.jobpoints && data.jobpoints.companies) {
+        let totalJp = 0;
+        for (let cp in data.jobpoints.companies) totalJp += data.jobpoints.companies[cp];
+        addStat('Job Points', formatNum(totalJp));
     }
+
+    // --- WORKING STATS ---
+    if (data.manual_labor !== undefined) addStat('Manual Labor', formatNum(data.manual_labor));
+    if (data.intelligence !== undefined) addStat('Intelligence', formatNum(data.intelligence));
+    if (data.endurance !== undefined) addStat('Endurance', formatNum(data.endurance));
+
+    // --- BATTLE STATS (Effective Values) ---
+    // Torn API structure for battlestats:
+    // data.strength, data.speed, data.dexterity, data.defense (can be base or effective depending on the API changes, usually they are the effective total).
+    // Sometimes it's data.strength_info.effective or just data.strength
+
+    let str = data.strength || (data.strength_info ? data.strength_info.effective : undefined);
+    let def = data.defense || (data.defense_info ? data.defense_info.effective : undefined);
+    let spd = data.speed || (data.speed_info ? data.speed_info.effective : undefined);
+    let dex = data.dexterity || (data.dexterity_info ? data.dexterity_info.effective : undefined);
+
+    if (str !== undefined) addStat('Strength', formatNum(str));
+    if (def !== undefined) addStat('Defense', formatNum(def));
+    if (spd !== undefined) addStat('Speed', formatNum(spd));
+    if (dex !== undefined) addStat('Dexterity', formatNum(dex));
+    if (data.total_stats !== undefined) addStat('Total Stats', formatNum(data.total_stats), 'color-accent');
 
     if(frag.childNodes.length === 0) {
         const noStats = document.createElement('div');
@@ -646,7 +666,7 @@ function renderTornStats(data) {
         noStats.style.textAlign = "center";
         noStats.style.color = "var(--text-muted)";
         noStats.style.fontSize = "0.85rem";
-        noStats.textContent = "No basic stats found.";
+        noStats.textContent = "No advanced stats mapped.";
         frag.appendChild(noStats);
     }
 
