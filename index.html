@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Daily Dashboard</title>
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="fab-container">
+        <button class="fab-btn" onclick="toggleTheme()" title="Toggle Theme"><i id="theme-icon" class="ph ph-moon"></i></button>
+        <button class="fab-btn" onclick="openSettings()" title="Settings"><i class="ph ph-gear"></i></button>
+    </div>
+
+    <div class="modal-overlay" id="settings-modal" onclick="closeSettingsOverlay(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="ph ph-sliders"></i> Settings</h2>
+                <button class="modal-close" onclick="closeSettings()"><i class="ph ph-x"></i></button>
+            </div>
+            
+            <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="set-name" class="form-control" placeholder="e.g. Steve">
+            </div>
+
+            <div class="form-group toggle-row">
+                <span class="toggle-label">Compact Workspace Mode</span>
+                <input type="checkbox" id="set-compact" style="width: 20px; height: 20px; accent-color: var(--accent);">
+            </div>
+
+            <div class="form-group toggle-row" style="margin-top: 15px;">
+                <span class="toggle-label">24-Hour Clock</span>
+                <input type="checkbox" id="set-clock24" style="width: 20px; height: 20px; accent-color: var(--accent);">
+            </div>
+
+            <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label><i class="ph-fill ph-paint-brush" style="margin-right: 5px;"></i> Visual Themes</label>
+                
+                <div style="margin-bottom: 15px;">
+                    <span class="toggle-label" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">Theme Engine</span>
+                    <select id="set-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;">
+                        <option value="glass">Glassmorphism (Default UI)</option>
+                        <option value="cyberpunk">Cyberpunk 2077 (Neon & Edges)</option>
+                        <option value="terminal">Terminal (Hacker Monospace)</option>
+                        <option value="pixel">Retro OS (8-Bit Pixel)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span class="toggle-label" style="font-size: 0.85rem;">Global Accent Color</span>
+                    <input type="color" id="set-accent" style="width: 35px; height: 35px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: transparent;">
+                </div>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">Note: Accent colors dynamically tint the Cyberpunk and Terminal themes!</span>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label>Module Visibility</label>
+                <div class="visibility-grid">
+                    <label><input type="checkbox" id="vis-search" class="vis-check"> Search Bar</label>
+                    <label><input type="checkbox" id="vis-time" class="vis-check"> Clock</label>
+                    <label><input type="checkbox" id="vis-tasks" class="vis-check"> Tasks</label>
+                    <label><input type="checkbox" id="vis-torn" class="vis-check"> Torn Tracker</label>
+                    <label><input type="checkbox" id="vis-bank" class="vis-check"> Bank Tools</label>
+                    <label><input type="checkbox" id="vis-weather" class="vis-check"> Weather</label>
+                    <label><input type="checkbox" id="vis-calendar" class="vis-check"> Calendar</label>
+                    <label><input type="checkbox" id="vis-shortcuts" class="vis-check"> Quick Links</label>
+                    <label><input type="checkbox" id="vis-notepad" class="vis-check"> Quick Notes</label>
+                    <label><input type="checkbox" id="vis-news" class="vis-check"> News Hub</label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label>Dashboard Background</label>
+                <div class="bg-picker-group">
+                    <div class="bg-btn active" id="bg-btn-anim" onclick="selectBgType('animated')">Animated / Theme Default</div>
+                    <div class="bg-btn" id="bg-btn-solid" onclick="selectBgType('solid')">Solid Override</div>
+                    <div class="bg-btn" id="bg-btn-image" onclick="selectBgType('image')">Image Override</div>
+                </div>
+                <input type="text" id="set-bg-val" class="form-control" placeholder="Color hex (#fff) or Image URL" style="display: none;">
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Weather Location Override</label>
+                <input type="text" id="set-weather" class="form-control" placeholder="Leave blank to use auto-IP...">
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>Custom News Feed (RSS)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="set-rss-name" class="form-control" placeholder="Tab Name (e.g. TechCrunch)" style="flex: 1;">
+                    <input type="text" id="set-rss-url" class="form-control" placeholder="RSS URL (https://...)" style="flex: 2;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label>Data Management</label>
+                <div class="backup-row">
+                    <div class="backup-btn" onclick="exportData()"><i class="ph ph-download-simple"></i> Export Backup</div>
+                    <label class="backup-btn" for="import-file" style="margin: 0;">
+                        <i class="ph ph-upload-simple"></i> Import Backup
+                        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(event)">
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn-primary" onclick="saveSettings()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="dashboard-grid">
+
+        <div class="card span-3 search-card" id="mod-search">
+            <i class="ph ph-magnifying-glass search-icon"></i>
+            <select id="search-engine" class="engine-select">
+                <option value="google">Google</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="bing">Bing</option>
+            </select>
+            <input type="text" id="universal-search" class="search-input" placeholder="Search the web... (Press Alt+S)" onkeypress="executeSearch(event)">
+        </div>
+        
+        <div class="card" id="mod-time">
+            <div class="time-drag-wrap">
+                <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+            </div>
+            <div class="clock-greeting-box">
+                <i id="clock-icon" class="ph-fill ph-sun-horizon clock-greeting-icon"></i>
+                <span id="greeting">Good Day</span>
+            </div>
+            <div class="clock-time-wrapper">
+                <div class="time-main">
+                    <span id="time-hr">00</span><span class="blinking-colon">:</span><span id="time-min">00</span>
+                </div>
+                <div id="time-ampm" class="time-ampm">AM</div>
+            </div>
+            <div class="date-pills-container">
+                <div class="date-pill" id="date-main"><i class="ph ph-calendar-blank"></i> Loading...</div>
+                <div class="date-pill hijri-pill" id="hijri-wrapper"><i class="ph-fill ph-moon-stars"></i> <span id="hijri-main"></span></div>
+            </div>
+            <div class="progress-header">
+                <span>Day Progress</span>
+                <span id="week-display">Week 0</span>
+            </div>
+            <div class="progress-container">
+                <div id="day-progress" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="card" id="mod-tasks">
+            <div class="card-header" style="margin-bottom: 10px;">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph ph-check-square-offset" style="margin-right: 8px;"></i>Tasks <span id="task-count" style="font-size: 0.9rem; color: var(--accent); font-weight: 800; margin-left: 5px;">(0)</span></h2>
+                </div>
+                <button class="btn-clean" onclick="clearCompletedTodos()">Clear Done</button>
+            </div>
+            
+            <div class="news-tabs" style="margin-bottom: 15px;">
+                <div class="news-tab active" id="task-tab-work" onclick="switchTaskTab('work')">Work</div>
+                <div class="news-tab" id="task-tab-personal" onclick="switchTaskTab('personal')">Personal</div>
+                <div class="news-tab" id="task-tab-coding" onclick="switchTaskTab('coding')">Coding</div>
+            </div>
+
+            <div class="todo-input-group">
+                <input type="text" id="todo-input" placeholder="Add a task... (Press Alt+T)" onkeypress="handleTodoKeyPress(event)">
+                <button class="btn-add" onclick="addTodo()">+</button>
+            </div>
+            <ul id="todo-list" class="todo-list"></ul>
+        </div>
+
+        <div class="card" id="mod-torn">
+            <div class="card-header" style="margin-bottom: 15px;">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph-fill ph-crosshair" style="margin-right: 8px;"></i>Torn Status</h2>
+                </div>
+                <button class="icon-btn" onclick="toggleTornConfig()" title="Configure API Key"><i class="ph ph-gear"></i></button>
+            </div>
+            
+            <div id="torn-display-view" class="torn-display">
+                <div class="torn-profile">
+                    <div class="torn-name" id="torn-profile-name">Connecting...</div>
+                    <div class="torn-status" id="torn-profile-status">--</div>
+                </div>
+                <div class="torn-money">
+                    <i class="ph-fill ph-wallet"></i> <span id="torn-cash">$0</span>
+                </div>
+                <div class="torn-bars-container">
+                    <div class="torn-bar-group">
+                        <div class="torn-bar-header"><span>Energy <span id="torn-en-full" class="torn-full-text"></span></span><span id="torn-en-val">-- / --</span></div>
+                        <div class="torn-bar-bg"><div id="torn-en-bar" class="torn-bar-fill" style="width:0%; background:#34c759;"></div></div>
+                    </div>
+                    <div class="torn-bar-group">
+                        <div class="torn-bar-header"><span>Nerve <span id="torn-ne-full" class="torn-full-text"></span></span><span id="torn-ne-val">-- / --</span></div>
+                        <div class="torn-bar-bg"><div id="torn-ne-bar" class="torn-bar-fill" style="width:0%; background:#ff3b30;"></div></div>
+                    </div>
+                    <div class="torn-bar-group">
+                        <div class="torn-bar-header"><span>Happy <span id="torn-ha-full" class="torn-full-text"></span></span><span id="torn-ha-val">-- / --</span></div>
+                        <div class="torn-bar-bg"><div id="torn-ha-bar" class="torn-bar-fill" style="width:0%; background:#ff9500;"></div></div>
+                    </div>
+                    <div class="torn-bar-group">
+                        <div class="torn-bar-header"><span>Life <span id="torn-li-full" class="torn-full-text"></span></span><span id="torn-li-val">-- / --</span></div>
+                        <div class="torn-bar-bg"><div id="torn-li-bar" class="torn-bar-fill" style="width:0%; background:#0066cc;"></div></div>
+                    </div>
+                </div>
+                <div class="torn-cds">
+                    <div class="torn-cd"><i class="ph-fill ph-first-aid" style="color:var(--danger)"></i> <span id="torn-cd-med">Ready</span></div>
+                    <div class="torn-cd"><i class="ph-fill ph-pill" style="color:var(--purple)"></i> <span id="torn-cd-drug">Ready</span></div>
+                    <div class="torn-cd"><i class="ph-fill ph-lightning" style="color:var(--warning)"></i> <span id="torn-cd-boo">Ready</span></div>
+                </div>
+                <button class="action-btn" style="margin-top: 15px; margin-left: auto; margin-right: auto;" onclick="fetchTornData()"><i class="ph ph-arrows-clockwise"></i> Force Sync</button>
+            </div>
+
+            <div id="torn-config-view" class="api-config" style="display: none;">
+                <input type="password" id="torn-cfg-key" class="shortcut-input" placeholder="Torn API Key (Public Access)">
+                <a href="https://www.torn.com/preferences.php#tab=api" target="_blank" style="font-size: 0.75rem; color: var(--accent); text-decoration: none; margin-bottom: 5px;">Get your API Key here</a>
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <button class="btn-add" style="flex: 1; padding: 8px; font-size: 0.95rem; border-radius:12px;" onclick="saveTornConfig()">Save Key</button>
+                    <button class="btn-clean" style="flex: 1;" onclick="toggleTornConfig()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="mod-bank-apps">
+            <div class="card-header" style="margin-bottom: 15px;">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph-fill ph-briefcase" style="margin-right: 8px;"></i>Bank Tools</h2>
+                </div>
+                <button class="icon-btn" onclick="toggleBankAppInputs()" title="Add Local App"><i class="ph ph-plus"></i></button>
+            </div>
+            
+            <div id="bank-app-inputs-container" class="shortcuts-inputs" style="display: none;">
+                <input type="text" id="ba-name" class="shortcut-input" placeholder="App Name (e.g. Calculators)">
+                <input type="text" id="ba-icon" class="shortcut-input" placeholder="Icon Class (e.g. ph-calculator)">
+                <input type="text" id="ba-path" class="shortcut-input" placeholder="File Name/Path (e.g. calculator.html)" onkeypress="handleBankAppKeyPress(event)">
+                <a href="https://phosphoricons.com/" target="_blank" style="font-size: 0.7rem; color: var(--accent); text-decoration: none; align-self: flex-end;">Find Icons Here</a>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-add" style="flex: 1; font-size: 0.95rem; padding: 8px; border-radius: 12px;" onclick="addBankApp()">Save Tool</button>
+                    <button class="btn-clean" style="flex: 1;" onclick="toggleBankAppInputs()">Cancel</button>
+                </div>
+            </div>
+
+            <div class="bank-apps-grid" id="bank-apps-grid">
+                </div>
+        </div>
+
+        <div class="card" id="mod-weather">
+            <div class="card-header" style="margin-bottom: 10px;">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph ph-cloud-sun" style="margin-right: 8px;"></i>Weather</h2>
+                </div>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <div id="location-display" class="location-text" title="Click gear icon to override">Detecting...</div>
+                    <i id="weather-card-chevron" class="ph ph-caret-down chevron" title="Toggle Details" onclick="toggleSection('weather-details-view', 'weather-card-chevron', 'weatherCardState')"></i>
+                </div>
+            </div>
+            <div id="weather-container">
+                <div class="loading">Tracking atmospheric data...</div>
+            </div>
+        </div>
+
+        <div class="card" id="mod-calendar">
+            <div class="card-header" style="margin-bottom: 15px;">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph ph-calendar-blank" style="margin-right: 8px;"></i>Calendar</h2>
+                </div>
+                <button class="calendar-today-btn" onclick="jumpToToday()">Today</button>
+            </div>
+            <div class="calendar-nav-header">
+                <button class="calendar-nav-btn" onclick="changeMonth(-1)" title="Previous Month">&#9664;</button>
+                <div id="calendar-month-name" class="calendar-month-name">Month</div>
+                <button class="calendar-nav-btn" onclick="changeMonth(1)" title="Next Month">&#9654;</button>
+            </div>
+            <div id="mini-calendar"></div>
+            
+            <div class="collapsible-header" onclick="toggleSection('holiday-list', 'holiday-chevron', 'holidayState')" title="Toggle Holidays">
+                <h3 style="font-size: 0.8rem; margin: 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Upcoming Holidays</h3>
+                <i id="holiday-chevron" class="ph ph-caret-down chevron"></i>
+            </div>
+            <ul id="holiday-list" class="holiday-list" style="display: none;"></ul>
+        </div>
+
+        <div class="card" id="mod-shortcuts">
+            <div class="card-header">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph ph-link" style="margin-right: 8px;"></i>Quick Links</h2>
+                </div>
+                <button class="icon-btn" onclick="toggleShortcutInputs()" title="Add New Link"><i class="ph ph-plus"></i></button>
+            </div>
+            
+            <div id="shortcut-inputs-container" class="shortcuts-inputs" style="display: none;">
+                <input type="text" id="sc-name" class="shortcut-input" placeholder="Site Name (e.g. Reddit)">
+                <input type="text" id="sc-path" class="shortcut-input" placeholder="URL (e.g. reddit.com)" onkeypress="handleShortcutKeyPress(event)">
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-add" style="flex: 1; font-size: 0.95rem; padding: 8px; border-radius: 12px;" onclick="addShortcut()">Save</button>
+                    <button class="btn-clean" style="flex: 1;" onclick="toggleShortcutInputs()">Cancel</button>
+                </div>
+            </div>
+            
+            <div id="shortcuts-grid" class="shortcuts-grid"></div>
+        </div>
+
+        <div class="card" id="mod-notepad">
+            <div class="card-header">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2 id="notepad-header-title"><i class="ph ph-notepad" style="margin-right: 8px;"></i>Quick Notes</h2>
+                </div>
+                <div id="notepad-list-actions">
+                    <button class="icon-btn" onclick="createNewNote()" title="Create New Note (Alt+N)"><i class="ph ph-plus"></i></button>
+                </div>
+                <div id="notepad-edit-actions" class="action-group" style="display: none;">
+                    <button class="action-btn" onclick="copyNote()"><i class="ph ph-copy"></i> Copy</button>
+                    <button class="action-btn" onclick="downloadNote()"><i class="ph ph-download-simple"></i> Save</button>
+                    <button class="action-btn" onclick="closeNote()"><i class="ph ph-check"></i> Done</button>
+                </div>
+            </div>
+            <div id="notepad-list-view" class="notepad-list-container">
+                <input type="text" id="note-search" class="note-search-input" placeholder="Search notes..." oninput="renderNotesList()">
+                <div id="notes-list-inject"></div>
+            </div>
+            <div id="notepad-edit-view" style="display: none; flex-direction: column; flex-grow: 1;">
+                <div class="note-edit-header">
+                    <input type="text" id="note-title-input" class="note-title-input" placeholder="Note Title...">
+                    <div class="color-picker-row">
+                        <span class="color-dot bg-none active" id="c-none" onclick="setNoteColor('none')" title="Default"></span>
+                        <span class="color-dot bg-blue" id="c-blue" onclick="setNoteColor('blue')" title="Blue"></span>
+                        <span class="color-dot bg-green" id="c-green" onclick="setNoteColor('green')" title="Green"></span>
+                        <span class="color-dot bg-yellow" id="c-yellow" onclick="setNoteColor('yellow')" title="Yellow"></span>
+                        <span class="color-dot bg-purple" id="c-purple" onclick="setNoteColor('purple')" title="Purple"></span>
+                        <span class="color-dot bg-red" id="c-red" onclick="setNoteColor('red')" title="Red"></span>
+                    </div>
+                </div>
+                
+                <div class="editor-container">
+                    <textarea id="notepad-input" placeholder="Write your note here...&#10;Auto-saves instantly."></textarea>
+                </div>
+
+                <div class="note-status-bar">
+                    <span id="note-char-count">0 chars</span>
+                    <span id="note-save-status"><i class="ph ph-cloud-check" style="margin-right:3px;"></i>Saved</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card span-3" id="mod-news">
+            <div class="card-header" style="margin-bottom: 10px;">
+                <div class="drag-header-group">
+                    <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
+                    <h2><i class="ph ph-newspaper" style="margin-right: 8px;"></i>News Hub</h2>
+                </div>
+                <button id="news-refresh-btn" class="icon-btn" onclick="refreshCurrentNews()" title="Force Refresh News"><i class="ph ph-arrows-clockwise"></i></button>
+            </div>
+            
+            <div class="news-tabs">
+                <div class="news-tab active" id="tab-dailystar" onclick="fetchNews('dailystar')">The Daily Star</div>
+                <div class="news-tab" id="tab-prothomalo" onclick="fetchNews('prothomalo')">Prothom Alo</div>
+                <div class="news-tab" id="tab-business" onclick="fetchNews('business')">Business</div>
+                <div class="news-tab" id="tab-sports" onclick="fetchNews('sports')">Sports</div>
+                <div class="news-tab" id="tab-global" onclick="fetchNews('global')">Global (Al Jazeera)</div>
+                <div class="news-tab" id="tab-custom" onclick="fetchNews('custom')" style="display: none;">Custom</div>
+            </div>
+
+            <div id="news-container">
+                <div class="loading">Fetching latest headlines...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
