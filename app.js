@@ -1429,35 +1429,29 @@ async function fetchNewsData(category, forceRefresh) {
     let targetFeed = feeds[category];
     const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
 
-    const MY_PRIVATE_PROXY = "https://script.google.com/macros/s/AKfycbwRKENOew0rgwnfbdUOYweWKLJkSeEenJD8d_pd_I2hpH6o9pQELRMCoRe00gS3PTIaTg/exec";
-
     try {
-        const cacheBuster = forceRefresh ? `?_t=${Date.now()}` : '';
-        let fetchUrl = `${MY_PRIVATE_PROXY}?url=${encodeURIComponent(targetFeed + cacheBuster)}`;
+        const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : '';
+        let fetchUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetFeed)}${cacheBuster}`;
 
         const res = await fetchWithTimeout(fetchUrl, 8000);
-        if (!res.ok) throw new Error("Proxy failed");
+        if (!res.ok) throw new Error("rss2json proxy failed");
 
-        const xmlText = await res.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlText, "text/xml");
+        const data = await res.json();
+        if (data.status !== 'ok') throw new Error("rss2json returned error status");
 
-        const nodes = Array.from(xml.querySelectorAll("item")).slice(0, 9);
-        if(nodes.length === 0) throw new Error("No XML items");
+        const nodes = data.items.slice(0, 9);
+        if (nodes.length === 0) throw new Error("No items in RSS");
 
         nodes.forEach(item => {
-            let title = item.querySelector("title")?.textContent || "News Article";
-            let link = item.querySelector("link")?.textContent || "#";
-            let pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
-            let desc = item.querySelector("description")?.textContent || "";
-            let content = item.getElementsByTagNameNS("*", "encoded")[0]?.textContent || "";
+            let title = item.title || "News Article";
+            let link = item.link || "#";
+            let pubDate = item.pubDate || new Date().toISOString();
+            let desc = item.description || "";
+            let content = item.content || "";
 
             let imgUrl = fallbackImg;
-            let enclosure = item.querySelector("enclosure");
-            let mediaContent = item.getElementsByTagNameNS("*", "content")[0];
-
-            if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
-            else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
+            if (item.thumbnail) imgUrl = item.thumbnail;
+            else if (item.enclosure && item.enclosure.link) imgUrl = item.enclosure.link;
             else {
                 let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
                 if (match) imgUrl = match[1];
@@ -1471,8 +1465,52 @@ async function fetchNewsData(category, forceRefresh) {
         });
         return items;
     } catch (error) {
-        console.error("News fetch error:", error);
-        throw error;
+        console.warn("rss2json failed, attempting fallback to allorigins.win", error);
+        try {
+            const cacheBuster = forceRefresh ? `?_t=${Date.now()}` : '';
+            let fetchUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetFeed + cacheBuster)}`;
+
+            const res = await fetchWithTimeout(fetchUrl, 8000);
+            if (!res.ok) throw new Error("allorigins proxy failed");
+
+            const json = await res.json();
+            const xmlText = json.contents;
+
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(xmlText, "text/xml");
+
+            const nodes = Array.from(xml.querySelectorAll("item")).slice(0, 9);
+            if(nodes.length === 0) throw new Error("No XML items");
+
+            nodes.forEach(item => {
+                let title = item.querySelector("title")?.textContent || "News Article";
+                let link = item.querySelector("link")?.textContent || "#";
+                let pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
+                let desc = item.querySelector("description")?.textContent || "";
+                let content = item.getElementsByTagNameNS("*", "encoded")[0]?.textContent || "";
+
+                let imgUrl = fallbackImg;
+                let enclosure = item.querySelector("enclosure");
+                let mediaContent = item.getElementsByTagNameNS("*", "content")[0];
+
+                if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
+                else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
+                else {
+                    let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                    if (match) imgUrl = match[1];
+                }
+
+                let dateObj = new Date(pubDate.replace(/-/g, '/'));
+                let hAgo = Math.floor((Date.now() - dateObj.getTime()) / 3600000);
+                let timeStr = isNaN(hAgo) ? "Recently" : (hAgo <= 0 ? "Just now" : hAgo + "h ago");
+
+                items.push({ title, link, imgUrl, source: sourcesNames[category], timeStr });
+            });
+            return items;
+        } catch (fallbackError) {
+            console.error("News fetch error (both proxies failed):", fallbackError);
+            throw fallbackError;
+        }
     }
 }
 
@@ -1528,7 +1566,7 @@ async function fetchNews(category, forceRefresh = false) {
         }
     }
 
-    c.innerHTML = '<div class="loading">Fetching latest headlines from Google Proxy...</div>';
+    c.innerHTML = '<div class="loading">Fetching latest headlines...</div>';
     triggerMasonryUpdate();
 
     try {
