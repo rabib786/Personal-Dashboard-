@@ -226,6 +226,14 @@
                     <div class="torn-cd"><i class="ph-fill ph-pill" style="color:var(--purple)"></i> <span id="torn-cd-drug">Ready</span></div>
                     <div class="torn-cd"><i class="ph-fill ph-lightning" style="color:var(--warning)"></i> <span id="torn-cd-boo">Ready</span></div>
                 </div>
+
+                <div class="collapsible-header" onclick="toggleSection('torn-stats-view', 'torn-stats-chevron', 'tornStatsState')" title="Toggle Stats" style="margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 10px;">
+                    <h3 style="font-size: 0.8rem; margin: 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">More Stats</h3>
+                    <i id="torn-stats-chevron" class="ph ph-caret-down chevron"></i>
+                </div>
+                <div id="torn-stats-view" class="weather-stats" style="display: none; width: 100%; margin-top: 10px;">
+                </div>
+
                 <button class="action-btn" style="margin-top: 15px; margin-left: auto; margin-right: auto;" onclick="fetchTornData()"><i class="ph ph-arrows-clockwise"></i> Force Sync</button>
             </div>
 
