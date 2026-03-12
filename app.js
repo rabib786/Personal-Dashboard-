@@ -1150,14 +1150,18 @@ async function fetchWeather(lat, lon, locName) {
                 </div>`;
         let hIdx = hr.time.findIndex(t => t >= new Date().toISOString().slice(0, 14)+"00"); if(hIdx === -1) hIdx = 0;
         html += `<div style="width: 100%;"><div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; color: var(--text-muted);">Hourly</div><div class="hourly-forecast">`;
+        const hourlyItems = [];
         for(let i=hIdx+1; i<=hIdx+6; i++) {
             if(!hr.time[i]) break;
-            html += `<div class="hourly-item"><span class="hourly-time">${new Date(hr.time[i]).toLocaleTimeString('en-US',{hour:'numeric'})}</span><span class="hourly-icon">${getWeatherDetails(hr.weather_code[i], 1).icon}</span><span class="hourly-temp">${Math.round(hr.temperature_2m[i])}&deg;</span>${hr.precipitation_probability[i]>0 ? `<div class="hourly-pop"><i class="ph-fill ph-drop" style="color: var(--accent);"></i> ${hr.precipitation_probability[i]}%</div>`:''}</div>`;
+            hourlyItems.push(`<div class="hourly-item"><span class="hourly-time">${new Date(hr.time[i]).toLocaleTimeString('en-US',{hour:'numeric'})}</span><span class="hourly-icon">${getWeatherDetails(hr.weather_code[i], 1).icon}</span><span class="hourly-temp">${Math.round(hr.temperature_2m[i])}&deg;</span>${hr.precipitation_probability[i]>0 ? `<div class="hourly-pop"><i class="ph-fill ph-drop" style="color: var(--accent);"></i> ${hr.precipitation_probability[i]}%</div>`:''}</div>`);
         }
+        html += hourlyItems.join('');
         html += `</div></div><div class="forecast-container" style="width: 100%;">`;
+        const dailyItems = [];
         for (let i=1; i<=4; i++) {
-            html += `<div class="forecast-day"><span class="fc-name">${new Date(day.time[i]).toLocaleDateString('en-US',{weekday:'short'})}</span><span class="fc-icon">${getWeatherDetails(day.weather_code[i], 1).icon}</span><div class="fc-temps"><span class="fc-max">${Math.round(day.temperature_2m_max[i])}&deg;</span><span class="fc-min">${Math.round(day.temperature_2m_min[i])}&deg;</span></div>${day.precipitation_probability_max[i]>0 ? `<div class="fc-pop"><i class="ph-fill ph-drop" style="color: var(--accent);"></i> ${day.precipitation_probability_max[i]}%</div>`:''}</div>`;
+            dailyItems.push(`<div class="forecast-day"><span class="fc-name">${new Date(day.time[i]).toLocaleDateString('en-US',{weekday:'short'})}</span><span class="fc-icon">${getWeatherDetails(day.weather_code[i], 1).icon}</span><div class="fc-temps"><span class="fc-max">${Math.round(day.temperature_2m_max[i])}&deg;</span><span class="fc-min">${Math.round(day.temperature_2m_min[i])}&deg;</span></div>${day.precipitation_probability_max[i]>0 ? `<div class="fc-pop"><i class="ph-fill ph-drop" style="color: var(--accent);"></i> ${day.precipitation_probability_max[i]}%</div>`:''}</div>`);
         }
+        html += dailyItems.join('');
         const wc = document.getElementById('weather-container');
         if(wc) { wc.innerHTML = html + `</div></div>`; triggerMasonryUpdate(); }
     } catch(e) { renderWeatherError(); }
