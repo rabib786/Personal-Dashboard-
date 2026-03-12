@@ -491,6 +491,24 @@ input, textarea, select, button { font-family: inherit; }
     opacity: 0.6;
 }
 
+[data-theme-style="terminal"],
+[data-theme-style="terminal"] * {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='18'><rect width='10' height='18' fill='%2300ff00'/></svg>") 5 9, auto !important;
+}
+[data-theme-style="terminal"] a,
+[data-theme-style="terminal"] a *,
+[data-theme-style="terminal"] button,
+[data-theme-style="terminal"] button *,
+[data-theme-style="terminal"] .card:hover,
+[data-theme-style="terminal"] .news-tab,
+[data-theme-style="terminal"] .color-dot,
+[data-theme-style="terminal"] input[type="checkbox"],
+[data-theme-style="terminal"] .drag-handle,
+[data-theme-style="terminal"] .sub-item-drag-handle {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M0,10 L20,10 M10,0 L10,20' stroke='%2300ff00' stroke-width='2'/></svg>") 10 10, crosshair !important;
+}
+
+
 /* --- THEME 3: RETRO PIXEL OS --- */
 [data-theme-style="pixel"] {
     --glass-bg: #c0c0c0;
@@ -540,6 +558,24 @@ input, textarea, select, button { font-family: inherit; }
     border-color: #000000 #ffffff #ffffff #000000;
     transform: translate(1px, 1px) !important;
 }
+
+[data-theme-style="pixel"],
+[data-theme-style="pixel"] * {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><path fill='%23ffffff' stroke='%23000000' stroke-width='1.5' d='M2 2l18 10-7 2 5 7-3 2-5-7-4 5z'/></svg>") 2 2, auto !important;
+}
+[data-theme-style="pixel"] a,
+[data-theme-style="pixel"] a *,
+[data-theme-style="pixel"] button,
+[data-theme-style="pixel"] button *,
+[data-theme-style="pixel"] .card:hover,
+[data-theme-style="pixel"] .news-tab,
+[data-theme-style="pixel"] .color-dot,
+[data-theme-style="pixel"] input[type="checkbox"],
+[data-theme-style="pixel"] .drag-handle,
+[data-theme-style="pixel"] .sub-item-drag-handle {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><path fill='%23ffffff' stroke='%23000000' stroke-width='1.5' d='M10 2v6h-6v4h6v6h4v-6h6v-4h-6v-6z'/></svg>") 12 12, pointer !important;
+}
+
 /* --- THEME 4: NEO-BRUTALISM --- */
 [data-theme-style="brutalism"] {
     --glass-opacity: 1;
