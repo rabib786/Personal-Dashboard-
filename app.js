@@ -432,17 +432,53 @@ function renderBankApps() {
     if(!grid) return;
     grid.innerHTML = '';
     
-    if (bankAppsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px; grid-column: span 2;">No tools added.</div>'; triggerMasonryUpdate(); return; }
+    if (bankAppsArr.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.color = 'var(--text-muted)';
+        emptyMsg.style.fontSize = '0.85rem';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.padding = '20px';
+        emptyMsg.style.gridColumn = 'span 2';
+        emptyMsg.textContent = 'No tools added.';
+        grid.appendChild(emptyMsg);
+        triggerMasonryUpdate();
+        return;
+    }
     
     bankAppsArr.forEach((app, i) => {
-        grid.innerHTML += `
-            <div class="bank-app-wrapper" draggable="true" ondragstart="handleSubDragStart(event, 'bank')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'bank', bankAppsArr, saveBankApps, renderBankApps)" ondragend="handleSubDragEnd(event)">
-                <a href="${app.path}" target="_blank" class="app-tile">
-                    <i class="ph-fill ${app.icon}"></i>
-                    <span>${escapeHtml(app.name)}</span>
-                </a>
-                <button class="delete-btn bank-del-btn" onclick="deleteBankApp(${i}, event)" title="Remove Tool">&times;</button>
-            </div>`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'bank-app-wrapper';
+        wrapper.setAttribute('draggable', 'true');
+        wrapper.addEventListener('dragstart', (e) => handleSubDragStart(e, 'bank'));
+        wrapper.addEventListener('dragover', (e) => handleSubDragOver(e));
+        wrapper.addEventListener('drop', (e) => handleSubDrop(e, 'bank', bankAppsArr, saveBankApps, renderBankApps));
+        wrapper.addEventListener('dragend', (e) => handleSubDragEnd(e));
+
+        const link = document.createElement('a');
+        const safePath = (app.path || '').trim().toLowerCase().startsWith('javascript:') ? '#' : app.path;
+        link.setAttribute('href', safePath);
+        link.setAttribute('target', '_blank');
+        link.className = 'app-tile';
+
+        const icon = document.createElement('i');
+        const safeIcon = (app.icon || '').replace(/"/g, '');
+        icon.className = `ph-fill ${safeIcon}`;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = app.name;
+
+        link.appendChild(icon);
+        link.appendChild(nameSpan);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn bank-del-btn';
+        deleteBtn.setAttribute('title', 'Remove Tool');
+        deleteBtn.textContent = '×';
+        deleteBtn.addEventListener('click', (e) => deleteBankApp(i, e));
+
+        wrapper.appendChild(link);
+        wrapper.appendChild(deleteBtn);
+        grid.appendChild(wrapper);
     });
     triggerMasonryUpdate();
 }
@@ -661,19 +697,58 @@ function renderTodos() {
     const currentList = todos[activeTaskTab] || [];
     const tc = document.getElementById('task-count');
     if(tc) tc.innerText = `(${currentList.filter(t => !t.completed).length})`;
-    const list = document.getElementById('todo-list'); 
+    const list = document.getElementById('todo-list');
     if(!list) return;
-    list.innerHTML = currentList.length === 0 ? '<li style="text-align:center; color:var(--text-muted); padding: 30px 0; font-weight: 500;">All caught up!</li>' : '';
-    
-    currentList.forEach((t, i) => { 
-        list.innerHTML += `
-        <li class="todo-item ${t.completed ? 'completed' : ''}" draggable="true" ondragstart="handleSubDragStart(event, 'task')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'task', todos['${activeTaskTab}'], saveTodos, renderTodos)" ondragend="handleSubDragEnd(event)">
-            <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
-            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${i})">
-            <span class="todo-text" onclick="toggleTodo(${i})">${escapeHtml(t.text)}</span>
-            <button class="delete-btn" onclick="deleteTodo(${i})" title="Delete task">&times;</button>
-        </li>`; 
-    });
+    list.innerHTML = '';
+
+    if (currentList.length === 0) {
+        const emptyMsg = document.createElement('li');
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.color = 'var(--text-muted)';
+        emptyMsg.style.padding = '30px 0';
+        emptyMsg.style.fontWeight = '500';
+        emptyMsg.textContent = 'All caught up!';
+        list.appendChild(emptyMsg);
+    } else {
+        currentList.forEach((t, i) => {
+            const li = document.createElement('li');
+            li.className = `todo-item ${t.completed ? 'completed' : ''}`;
+            li.setAttribute('draggable', 'true');
+            li.addEventListener('dragstart', (e) => handleSubDragStart(e, 'task'));
+            li.addEventListener('dragover', (e) => handleSubDragOver(e));
+            li.addEventListener('drop', (e) => handleSubDrop(e, 'task', todos[activeTaskTab], saveTodos, renderTodos));
+            li.addEventListener('dragend', (e) => handleSubDragEnd(e));
+
+            const handle = document.createElement('div');
+            handle.className = 'sub-item-drag-handle';
+            handle.setAttribute('title', 'Drag to reorder');
+            const handleIcon = document.createElement('i');
+            handleIcon.className = 'ph ph-dots-six-vertical';
+            handle.appendChild(handleIcon);
+
+            const checkbox = document.createElement('input');
+            checkbox.setAttribute('type', 'checkbox');
+            if(t.completed) checkbox.setAttribute('checked', 'checked');
+            checkbox.addEventListener('change', () => toggleTodo(i));
+
+            const span = document.createElement('span');
+            span.className = 'todo-text';
+            span.textContent = t.text;
+            span.addEventListener('click', () => toggleTodo(i));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.setAttribute('title', 'Delete task');
+            deleteBtn.textContent = '×';
+            deleteBtn.addEventListener('click', () => deleteTodo(i));
+
+            li.appendChild(handle);
+            li.appendChild(checkbox);
+            li.appendChild(span);
+            li.appendChild(deleteBtn);
+            list.appendChild(li);
+        });
+    }
     triggerMasonryUpdate();
 }
 function addTodo() { 
@@ -901,23 +976,82 @@ function toggleShortcutInputs() {
 function initShortcutsEngine() { renderShortcuts(); }
 function saveShortcuts() { localStorage.setItem('dashboardBookmarks', JSON.stringify(shortcutsArr)); }
 function renderShortcuts() {
-    const grid = document.getElementById('shortcuts-grid'); 
+    const grid = document.getElementById('shortcuts-grid');
     if(!grid) return;
     grid.innerHTML = '';
-    if (shortcutsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">No links added yet.</div>'; triggerMasonryUpdate(); return; }
+    if (shortcutsArr.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.color = 'var(--text-muted)';
+        emptyMsg.style.fontSize = '0.85rem';
+        emptyMsg.style.textAlign = 'center';
+        emptyMsg.style.padding = '20px';
+        emptyMsg.textContent = 'No links added yet.';
+        grid.appendChild(emptyMsg);
+        triggerMasonryUpdate();
+        return;
+    }
+
     shortcutsArr.forEach((sc, i) => {
-        let domain = sc.path.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
-        let favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-        let onErrorFallback = `this.outerHTML='<i class=\\'ph-fill ph-globe shortcut-fallback-icon\\'></i>'`;
-        grid.innerHTML += `
-            <div class="shortcut-item" draggable="true" ondragstart="handleSubDragStart(event, 'link')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'link', shortcutsArr, saveShortcuts, renderShortcuts)" ondragend="handleSubDragEnd(event)">
-                <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
-                <a href="${sc.path}" target="_blank" style="display:flex; align-items:center; gap:8px; flex-grow:1; text-decoration:none; color:inherit;">
-                    <div class="shortcut-icon-wrapper"><img src="${favUrl}" alt="" onerror="${onErrorFallback}"></div>
-                    <div class="shortcut-info"><span class="shortcut-name" title="${escapeHtml(sc.name)}">${escapeHtml(sc.name)}</span></div>
-                </a>
-                <button class="delete-btn" onclick="deleteShortcut(${i}, event)" title="Remove Link">&times;</button>
-            </div>`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'shortcut-item';
+        wrapper.setAttribute('draggable', 'true');
+        wrapper.addEventListener('dragstart', (e) => handleSubDragStart(e, 'link'));
+        wrapper.addEventListener('dragover', (e) => handleSubDragOver(e));
+        wrapper.addEventListener('drop', (e) => handleSubDrop(e, 'link', shortcutsArr, saveShortcuts, renderShortcuts));
+        wrapper.addEventListener('dragend', (e) => handleSubDragEnd(e));
+
+        const handle = document.createElement('div');
+        handle.className = 'sub-item-drag-handle';
+        handle.setAttribute('title', 'Drag to reorder');
+        const handleIcon = document.createElement('i');
+        handleIcon.className = 'ph ph-dots-six-vertical';
+        handle.appendChild(handleIcon);
+
+        const link = document.createElement('a');
+        const safePath = (sc.path || '').trim().toLowerCase().startsWith('javascript:') ? '#' : sc.path;
+        link.setAttribute('href', safePath);
+        link.setAttribute('target', '_blank');
+        link.style.display = 'flex';
+        link.style.alignItems = 'center';
+        link.style.gap = '8px';
+        link.style.flexGrow = '1';
+        link.style.textDecoration = 'none';
+        link.style.color = 'inherit';
+
+        const iconWrapper = document.createElement('div');
+        iconWrapper.className = 'shortcut-icon-wrapper';
+
+        const domain = (sc.path || '').replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
+        const favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        const img = document.createElement('img');
+        img.setAttribute('src', favUrl);
+        img.setAttribute('alt', '');
+        img.addEventListener('error', () => {
+            img.outerHTML = '<i class="ph-fill ph-globe shortcut-fallback-icon"></i>';
+        });
+        iconWrapper.appendChild(img);
+
+        const info = document.createElement('div');
+        info.className = 'shortcut-info';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'shortcut-name';
+        nameSpan.setAttribute('title', sc.name);
+        nameSpan.textContent = sc.name;
+        info.appendChild(nameSpan);
+
+        link.appendChild(iconWrapper);
+        link.appendChild(info);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.setAttribute('title', 'Remove Link');
+        deleteBtn.textContent = '×';
+        deleteBtn.addEventListener('click', (e) => deleteShortcut(i, e));
+
+        wrapper.appendChild(handle);
+        wrapper.appendChild(link);
+        wrapper.appendChild(deleteBtn);
+        grid.appendChild(wrapper);
     });
     triggerMasonryUpdate();
 }
@@ -952,31 +1086,76 @@ function initNotesEngine() {
 function saveNotesArr() { localStorage.setItem('dashboardNotes', JSON.stringify(notesArr)); }
 
 function renderNotesList() {
-    const list = document.getElementById('notes-list-inject'); 
+    const list = document.getElementById('notes-list-inject');
     const searchEl = document.getElementById('note-search');
     if(!list || !searchEl) return;
-    
+
     const searchQ = searchEl.value.toLowerCase(); list.innerHTML = '';
     let filteredNotes = searchQ ? notesArr.filter(n => n.title.toLowerCase().includes(searchQ) || n.content.toLowerCase().includes(searchQ)) : notesArr;
-    if (filteredNotes.length === 0) { list.innerHTML = `<div class="loading">${searchQ ? 'No matches found.' : 'No notes yet. Click + to create.'}</div>`; triggerMasonryUpdate(); return; }
+
+    if (filteredNotes.length === 0) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.textContent = searchQ ? 'No matches found.' : 'No notes yet. Click + to create.';
+        list.appendChild(loadingDiv);
+        triggerMasonryUpdate();
+        return;
+    }
 
     [...filteredNotes].sort((a, b) => { if(a.pinned === b.pinned) return b.lastEdited - a.lastEdited; return a.pinned ? -1 : 1; }).forEach(note => {
         const diffMins = Math.floor((Date.now() - note.lastEdited) / 60000);
         let dateStr = diffMins < 1 ? "Just now" : diffMins < 60 ? `${diffMins}m` : diffMins < 1440 ? `${Math.floor(diffMins/60)}h` : new Date(note.lastEdited).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const pinClass = note.pinned ? 'pinned' : ''; const pinIcon = note.pinned ? 'ph-fill ph-push-pin' : 'ph ph-push-pin';
-        
-        list.innerHTML += `
-            <div class="note-item color-${note.color} ${pinClass}" onclick="openNote(${note.id})">
-                <div class="note-item-content">
-                    <div class="note-title">${escapeHtml(note.title.trim() || "Untitled")}</div>
-                    <div class="note-excerpt">${escapeHtml(note.content.trim().substring(0, 40)) || "..."}</div>
-                </div>
-                <div class="note-actions-col">
-                    <button class="pin-btn" onclick="togglePin(${note.id}, event)" title="Pin Note"><i class="${pinIcon}"></i></button>
-                    <span style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">${dateStr}</span>
-                </div>
-                <button class="note-delete-btn" onclick="deleteNote(${note.id}, event)" title="Delete">&times;</button>
-            </div>`;
+        const pinClass = note.pinned ? 'pinned' : '';
+        const pinIconClass = note.pinned ? 'ph-fill ph-push-pin' : 'ph ph-push-pin';
+
+        const noteItem = document.createElement('div');
+        noteItem.className = `note-item color-${note.color} ${pinClass}`;
+        noteItem.addEventListener('click', () => openNote(note.id));
+
+        const noteContent = document.createElement('div');
+        noteContent.className = 'note-item-content';
+
+        const noteTitle = document.createElement('div');
+        noteTitle.className = 'note-title';
+        noteTitle.textContent = note.title.trim() || "Untitled";
+
+        const noteExcerpt = document.createElement('div');
+        noteExcerpt.className = 'note-excerpt';
+        noteExcerpt.textContent = note.content.trim().substring(0, 40) || "...";
+
+        noteContent.appendChild(noteTitle);
+        noteContent.appendChild(noteExcerpt);
+
+        const noteActions = document.createElement('div');
+        noteActions.className = 'note-actions-col';
+
+        const pinBtn = document.createElement('button');
+        pinBtn.className = 'pin-btn';
+        pinBtn.setAttribute('title', 'Pin Note');
+        pinBtn.addEventListener('click', (e) => togglePin(note.id, e));
+        const pinIcon = document.createElement('i');
+        pinIcon.className = pinIconClass;
+        pinBtn.appendChild(pinIcon);
+
+        const dateSpan = document.createElement('span');
+        dateSpan.style.fontSize = '0.65rem';
+        dateSpan.style.color = 'var(--text-muted)';
+        dateSpan.style.fontWeight = '700';
+        dateSpan.textContent = dateStr;
+
+        noteActions.appendChild(pinBtn);
+        noteActions.appendChild(dateSpan);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'note-delete-btn';
+        deleteBtn.setAttribute('title', 'Delete');
+        deleteBtn.textContent = '×';
+        deleteBtn.addEventListener('click', (e) => deleteNote(note.id, e));
+
+        noteItem.appendChild(noteContent);
+        noteItem.appendChild(noteActions);
+        noteItem.appendChild(deleteBtn);
+        list.appendChild(noteItem);
     });
     triggerMasonryUpdate();
 }
@@ -1111,17 +1290,47 @@ async function fetchNewsData(category, forceRefresh) {
 
 function renderNewsItems(items, container) {
     const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
-    let html = '<div class="news-list">';
+    container.innerHTML = '';
+    const listDiv = document.createElement('div');
+    listDiv.className = 'news-list';
+
     items.forEach(p => {
-        html += `
-            <a href="${p.link}" target="_blank" class="news-item">
-                <div class="news-image-wrapper"><img src="${p.imgUrl}" class="news-image" alt="Img" onerror="this.src='${fallbackImg}'"></div>
-                <div class="news-content"><div class="news-title">${escapeHtml(p.title)}</div><div class="news-source">${p.source} &bull; ${p.timeStr}</div></div>
-            </a>`;
+        const itemLink = document.createElement('a');
+        const safeLink = (p.link || '').trim().toLowerCase().startsWith('javascript:') ? '#' : p.link;
+        itemLink.setAttribute('href', safeLink);
+        itemLink.setAttribute('target', '_blank');
+        itemLink.className = 'news-item';
+
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'news-image-wrapper';
+        const img = document.createElement('img');
+        img.className = 'news-image';
+        img.setAttribute('alt', 'Img');
+        img.setAttribute('src', p.imgUrl || fallbackImg);
+        img.addEventListener('error', () => { img.src = fallbackImg; });
+        imgWrapper.appendChild(img);
+
+        const newsContent = document.createElement('div');
+        newsContent.className = 'news-content';
+
+        const newsTitle = document.createElement('div');
+        newsTitle.className = 'news-title';
+        newsTitle.textContent = p.title;
+
+        const newsSource = document.createElement('div');
+        newsSource.className = 'news-source';
+        newsSource.textContent = `${p.source} • ${p.timeStr}`;
+
+        newsContent.appendChild(newsTitle);
+        newsContent.appendChild(newsSource);
+
+        itemLink.appendChild(imgWrapper);
+        itemLink.appendChild(newsContent);
+        listDiv.appendChild(itemLink);
     });
-    container.innerHTML = html + '</div>';
+    container.appendChild(listDiv);
     triggerMasonryUpdate();
-    setTimeout(triggerMasonryUpdate, 800); 
+    setTimeout(triggerMasonryUpdate, 800);
 }
 
 async function fetchNews(category, forceRefresh = false) {
