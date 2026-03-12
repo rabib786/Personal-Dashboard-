@@ -942,14 +942,14 @@ function saveManualCity() {
 }
 
 function getWeatherDetails(code, isDay = 1) {
-    if (code === 0) return { desc: 'Clear', icon: isDay ? '<i class="ph-fill ph-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-moon" style="color: #a1a1a6;"></i>' };
-    if ([1,2].includes(code)) return { desc: 'Cloudy', icon: isDay ? '<i class="ph-fill ph-cloud-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-cloud-moon" style="color: #a1a1a6;"></i>' };
-    if (code === 3) return { desc: 'Overcast', icon: '<i class="ph-fill ph-cloud" style="color: #a1a1a6;"></i>' };
-    if ([45, 48].includes(code)) return { desc: 'Fog', icon: '<i class="ph-fill ph-cloud-fog" style="color: #a1a1a6;"></i>' };
-    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { desc: 'Rain', icon: '<i class="ph-fill ph-cloud-rain" style="color: #4285F4;"></i>' };
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return { desc: 'Snow', icon: '<i class="ph-fill ph-cloud-snow" style="color: #8ec5fc;"></i>' };
-    if ([95, 96, 99].includes(code)) return { desc: 'Storm', icon: '<i class="ph-fill ph-cloud-lightning" style="color: #ff9500;"></i>' };
-    return { desc: 'Unknown', icon: '<i class="ph-fill ph-sun"></i>' };
+    if (code === 0) return { desc: 'Clear', icon: isDay ? '<i class="ph-fill ph-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-moon" style="color: #a1a1a6;"></i>', bgClass: isDay ? 'weather-bg-clear-day' : 'weather-bg-clear-night' };
+    if ([1,2].includes(code)) return { desc: 'Cloudy', icon: isDay ? '<i class="ph-fill ph-cloud-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-cloud-moon" style="color: #a1a1a6;"></i>', bgClass: isDay ? 'weather-bg-cloudy-day' : 'weather-bg-cloudy-night' };
+    if (code === 3) return { desc: 'Overcast', icon: '<i class="ph-fill ph-cloud" style="color: #a1a1a6;"></i>', bgClass: 'weather-bg-overcast' };
+    if ([45, 48].includes(code)) return { desc: 'Fog', icon: '<i class="ph-fill ph-cloud-fog" style="color: #a1a1a6;"></i>', bgClass: 'weather-bg-fog' };
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { desc: 'Rain', icon: '<i class="ph-fill ph-cloud-rain" style="color: #4285F4;"></i>', bgClass: 'weather-bg-rain', animClass: 'weather-anim-rain' };
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return { desc: 'Snow', icon: '<i class="ph-fill ph-cloud-snow" style="color: #8ec5fc;"></i>', bgClass: 'weather-bg-snow', animClass: 'weather-anim-snow' };
+    if ([95, 96, 99].includes(code)) return { desc: 'Storm', icon: '<i class="ph-fill ph-cloud-lightning" style="color: #ff9500;"></i>', bgClass: 'weather-bg-storm', animClass: 'weather-anim-rain' };
+    return { desc: 'Unknown', icon: '<i class="ph-fill ph-sun"></i>', bgClass: 'weather-bg-clear-day' };
 }
 function getWindDir(d) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]; }
 
@@ -968,6 +968,27 @@ async function fetchWeather(lat, lon, locName) {
         const data = await wRes.json(), aqiData = await aRes.json();
         const cur = data.current, day = data.daily, hr = data.hourly;
         const wInfo = getWeatherDetails(cur.weather_code, cur.is_day);
+
+        // --- Apply dynamic weather background ---
+        const modWeather = document.getElementById('mod-weather');
+        if (modWeather) {
+            // Remove existing weather background classes
+            modWeather.className = modWeather.className.replace(/\bweather-bg-\S+/g, '');
+            modWeather.classList.add(wInfo.bgClass);
+
+            // Handle animated overlay
+            let overlay = modWeather.querySelector('.weather-fx-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'weather-fx-overlay';
+                modWeather.insertBefore(overlay, modWeather.firstChild);
+            }
+            overlay.className = 'weather-fx-overlay'; // Reset overlay classes
+            if (wInfo.animClass) {
+                overlay.classList.add(wInfo.animClass);
+            }
+        }
+
         const aqi = aqiData.current.us_aqi;
         const aInfo = aqi<=50 ? {l:'Good',c:'#34c759'} : aqi<=100 ? {l:'Moderate',c:'#ff9500'} : aqi<=150 ? {l:'Unhealthy',c:'#ff3b30'} : {l:'Hazardous',c:'#af52de'};
 
