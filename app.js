@@ -501,7 +501,7 @@ function renderBankApps() {
                     <i class="ph-fill ${app.icon}"></i>
                     <span>${escapeHtml(app.name)}</span>
                 </a>
-                <button class="delete-btn bank-del-btn" onclick="deleteBankApp(${i}, event)" title="Remove Tool">&times;</button>
+                <button class="delete-btn bank-del-btn" aria-label="Remove Tool" onclick="deleteBankApp(${i}, event)" title="Remove Tool">&times;</button>
             </div>`;
     });
     grid.innerHTML = html;
@@ -934,9 +934,9 @@ function renderTodos() {
         html += `
         <li class="todo-item ${t.completed ? 'completed' : ''}" draggable="true" ondragstart="handleSubDragStart(event, 'task')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'task', todos['${activeTaskTab}'], saveTodos, renderTodos)" ondragend="handleSubDragEnd(event)">
             <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
-            <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${i})">
+            <input type="checkbox" aria-label="Toggle task completion" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${i})">
             <span class="todo-text" onclick="toggleTodo(${i})">${escapeHtml(t.text)}</span>
-            <button class="delete-btn" onclick="deleteTodo(${i})" title="Delete task">&times;</button>
+            <button class="delete-btn" aria-label="Delete task" onclick="deleteTodo(${i})" title="Delete task">&times;</button>
         </li>`;
     });
     list.innerHTML = html;
@@ -1280,7 +1280,7 @@ function renderShortcuts() {
                     <div class="shortcut-icon-wrapper"><img src="${favUrl}" alt="" onerror="${onErrorFallback}"></div>
                     <div class="shortcut-info"><span class="shortcut-name" title="${escapeHtml(sc.name)}">${escapeHtml(sc.name)}</span></div>
                 </a>
-                <button class="delete-btn" onclick="deleteShortcut(${i}, event)" title="Remove Link">&times;</button>
+                <button class="delete-btn" aria-label="Remove Link" onclick="deleteShortcut(${i}, event)" title="Remove Link">&times;</button>
             </div>`;
     });
     grid.innerHTML = html;
@@ -1338,10 +1338,10 @@ function renderNotesList() {
                     <div class="note-excerpt">${escapeHtml(note.content.trim().substring(0, 40)) || "..."}</div>
                 </div>
                 <div class="note-actions-col">
-                    <button class="pin-btn" onclick="togglePin(${note.id}, event)" title="Pin Note"><i class="${pinIcon}"></i></button>
+                    <button class="pin-btn" aria-label="Pin Note" onclick="togglePin(${note.id}, event)" title="Pin Note"><i class="${pinIcon}"></i></button>
                     <span style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">${dateStr}</span>
                 </div>
-                <button class="note-delete-btn" onclick="deleteNote(${note.id}, event)" title="Delete">&times;</button>
+                <button class="note-delete-btn" aria-label="Delete Note" onclick="deleteNote(${note.id}, event)" title="Delete">&times;</button>
             </div>`;
     });
     list.innerHTML = html;

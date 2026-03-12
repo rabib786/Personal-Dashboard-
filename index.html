@@ -30,17 +30,17 @@
             </div>
 
             <div class="form-group">
-                <label>Your Name</label>
+                <label for="set-name">Your Name</label>
                 <input type="text" id="set-name" class="form-control" placeholder="e.g. Steve">
             </div>
 
             <div class="form-group toggle-row">
-                <span class="toggle-label">Compact Workspace Mode</span>
+                <label class="toggle-label" for="set-compact">Compact Workspace Mode</label>
                 <input type="checkbox" id="set-compact" style="width: 20px; height: 20px; accent-color: var(--accent);">
             </div>
 
             <div class="form-group toggle-row" style="margin-top: 15px;">
-                <span class="toggle-label">24-Hour Clock</span>
+                <label class="toggle-label" for="set-clock24">24-Hour Clock</label>
                 <input type="checkbox" id="set-clock24" style="width: 20px; height: 20px; accent-color: var(--accent);">
             </div>
 
@@ -48,7 +48,7 @@
                 <label><i class="ph-fill ph-paint-brush" style="margin-right: 5px;"></i> Visual Themes</label>
 
                 <div style="margin-bottom: 15px;">
-                    <span class="toggle-label" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">Theme Engine</span>
+                    <label class="toggle-label" for="set-theme" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">Theme Engine</label>
                     <select id="set-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;">
                         <option value="glass">Glassmorphism (Default UI)</option>
                         <option value="cyberpunk">Cyberpunk 2077 (Neon & Edges)</option>
@@ -61,8 +61,8 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                    <span class="toggle-label" style="font-size: 0.85rem;">Global Accent Color</span>
-                    <input type="color" id="set-accent" style="width: 35px; height: 35px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: transparent;">
+                    <label class="toggle-label" for="set-accent" style="font-size: 0.85rem;">Global Accent Color</label>
+                    <input type="color" id="set-accent" aria-label="Global Accent Color" style="width: 35px; height: 35px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: transparent;">
                 </div>
                 <span style="font-size: 0.7rem; color: var(--text-muted);">Note: Accent colors dynamically tint the Cyberpunk and Terminal themes!</span>
             </div>
@@ -70,39 +70,39 @@
             <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
                 <label>Module Visibility</label>
                 <div class="visibility-grid">
-                    <label><input type="checkbox" id="vis-search" class="vis-check"> Search Bar</label>
-                    <label><input type="checkbox" id="vis-time" class="vis-check"> Clock</label>
-                    <label><input type="checkbox" id="vis-tasks" class="vis-check"> Tasks</label>
-                    <label><input type="checkbox" id="vis-torn" class="vis-check"> Torn Tracker</label>
-                    <label><input type="checkbox" id="vis-bank" class="vis-check"> Bank Tools</label>
-                    <label><input type="checkbox" id="vis-weather" class="vis-check"> Weather</label>
-                    <label><input type="checkbox" id="vis-calendar" class="vis-check"> Calendar</label>
-                    <label><input type="checkbox" id="vis-shortcuts" class="vis-check"> Quick Links</label>
-                    <label><input type="checkbox" id="vis-notepad" class="vis-check"> Quick Notes</label>
-                    <label><input type="checkbox" id="vis-news" class="vis-check"> News Hub</label>
+                    <label for="vis-search"><input type="checkbox" id="vis-search" class="vis-check"> Search Bar</label>
+                    <label for="vis-time"><input type="checkbox" id="vis-time" class="vis-check"> Clock</label>
+                    <label for="vis-tasks"><input type="checkbox" id="vis-tasks" class="vis-check"> Tasks</label>
+                    <label for="vis-torn"><input type="checkbox" id="vis-torn" class="vis-check"> Torn Tracker</label>
+                    <label for="vis-bank"><input type="checkbox" id="vis-bank" class="vis-check"> Bank Tools</label>
+                    <label for="vis-weather"><input type="checkbox" id="vis-weather" class="vis-check"> Weather</label>
+                    <label for="vis-calendar"><input type="checkbox" id="vis-calendar" class="vis-check"> Calendar</label>
+                    <label for="vis-shortcuts"><input type="checkbox" id="vis-shortcuts" class="vis-check"> Quick Links</label>
+                    <label for="vis-notepad"><input type="checkbox" id="vis-notepad" class="vis-check"> Quick Notes</label>
+                    <label for="vis-news"><input type="checkbox" id="vis-news" class="vis-check"> News Hub</label>
                 </div>
             </div>
 
             <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                <label>Dashboard Background</label>
+                <label for="set-bg-val">Dashboard Background</label>
                 <div class="bg-picker-group">
-                    <div class="bg-btn active" id="bg-btn-anim" onclick="selectBgType('animated')">Animated / Theme Default</div>
-                    <div class="bg-btn" id="bg-btn-solid" onclick="selectBgType('solid')">Solid Override</div>
-                    <div class="bg-btn" id="bg-btn-image" onclick="selectBgType('image')">Image Override</div>
+                    <button class="bg-btn active" id="bg-btn-anim" onclick="selectBgType('animated')">Animated / Theme Default</button>
+                    <button class="bg-btn" id="bg-btn-solid" onclick="selectBgType('solid')">Solid Override</button>
+                    <button class="bg-btn" id="bg-btn-image" onclick="selectBgType('image')">Image Override</button>
                 </div>
-                <input type="text" id="set-bg-val" class="form-control" placeholder="Color hex (#fff) or Image URL" style="display: none;">
+                <input type="text" id="set-bg-val" aria-label="Dashboard Background Value" class="form-control" placeholder="Color hex (#fff) or Image URL" style="display: none;">
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
-                <label>Weather Location Override</label>
+                <label for="set-weather">Weather Location Override</label>
                 <input type="text" id="set-weather" class="form-control" placeholder="Leave blank to use auto-IP..." aria-label="Weather Location Override">
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
                 <label>Manage News Sources (RSS)</label>
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="set-rss-name" class="form-control" placeholder="Source Name (e.g. TechCrunch)" style="flex: 1;">
-                    <input type="text" id="set-rss-url" class="form-control" placeholder="RSS URL (https://...)" style="flex: 2;">
+                    <input type="text" id="set-rss-name" aria-label="RSS Source Name" class="form-control" placeholder="Source Name (e.g. TechCrunch)" style="flex: 1;">
+                    <input type="text" id="set-rss-url" aria-label="RSS Source URL" class="form-control" placeholder="RSS URL (https://...)" style="flex: 2;">
                     <button class="btn-add" onclick="addCustomRssSource()" style="padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer;">Add</button>
                 </div>
                 <div id="rss-sources-list" style="display: flex; flex-direction: column; gap: 5px; max-height: 150px; overflow-y: auto;">
@@ -241,7 +241,7 @@
             </div>
 
             <div id="torn-config-view" class="api-config" style="display: none;">
-                <input type="password" id="torn-cfg-key" class="shortcut-input" placeholder="Torn API Key (Public Access)">
+                <input type="password" id="torn-cfg-key" aria-label="Torn API Key" class="shortcut-input" placeholder="Torn API Key (Public Access)">
                 <a href="https://www.torn.com/preferences.php#tab=api" target="_blank" style="font-size: 0.75rem; color: var(--accent); text-decoration: none; margin-bottom: 5px;">Get your API Key here</a>
                 <div style="display: flex; gap: 8px; margin-top: 5px;">
                     <button class="btn-add" style="flex: 1; padding: 8px; font-size: 0.95rem; border-radius:12px;" onclick="saveTornConfig()">Save Key</button>
@@ -260,9 +260,9 @@
             </div>
 
             <div id="bank-app-inputs-container" class="shortcuts-inputs" style="display: none;">
-                <input type="text" id="ba-name" class="shortcut-input" placeholder="App Name (e.g. Calculators)">
-                <input type="text" id="ba-icon" class="shortcut-input" placeholder="Icon Class (e.g. ph-calculator)">
-                <input type="text" id="ba-path" class="shortcut-input" placeholder="File Name/Path (e.g. calculator.html)" onkeypress="handleBankAppKeyPress(event)">
+                <input type="text" id="ba-name" aria-label="App Name" class="shortcut-input" placeholder="App Name (e.g. Calculators)">
+                <input type="text" id="ba-icon" aria-label="App Icon Class" class="shortcut-input" placeholder="Icon Class (e.g. ph-calculator)">
+                <input type="text" id="ba-path" aria-label="App File Path" class="shortcut-input" placeholder="File Name/Path (e.g. calculator.html)" onkeypress="handleBankAppKeyPress(event)">
                 <a href="https://phosphoricons.com/" target="_blank" style="font-size: 0.7rem; color: var(--accent); text-decoration: none; align-self: flex-end;">Find Icons Here</a>
                 <div style="display: flex; gap: 8px;">
                     <button class="btn-add" style="flex: 1; font-size: 0.95rem; padding: 8px; border-radius: 12px;" onclick="addBankApp()">Save Tool</button>
@@ -299,9 +299,9 @@
                 <button class="calendar-today-btn" onclick="jumpToToday()">Today</button>
             </div>
             <div class="calendar-nav-header">
-                <button class="calendar-nav-btn" onclick="changeMonth(-1)" title="Previous Month">&#9664;</button>
+                <button class="calendar-nav-btn" aria-label="Previous Month" onclick="changeMonth(-1)" title="Previous Month">&#9664;</button>
                 <div id="calendar-month-name" class="calendar-month-name">Month</div>
-                <button class="calendar-nav-btn" onclick="changeMonth(1)" title="Next Month">&#9654;</button>
+                <button class="calendar-nav-btn" aria-label="Next Month" onclick="changeMonth(1)" title="Next Month">&#9654;</button>
             </div>
             <div id="mini-calendar"></div>
 
@@ -322,8 +322,8 @@
             </div>
 
             <div id="shortcut-inputs-container" class="shortcuts-inputs" style="display: none;">
-                <input type="text" id="sc-name" class="shortcut-input" placeholder="Site Name (e.g. Reddit)">
-                <input type="text" id="sc-path" class="shortcut-input" placeholder="URL (e.g. reddit.com)" onkeypress="handleShortcutKeyPress(event)">
+                <input type="text" id="sc-name" aria-label="Shortcut Site Name" class="shortcut-input" placeholder="Site Name (e.g. Reddit)">
+                <input type="text" id="sc-path" aria-label="Shortcut Site URL" class="shortcut-input" placeholder="URL (e.g. reddit.com)" onkeypress="handleShortcutKeyPress(event)">
                 <div style="display: flex; gap: 8px;">
                     <button class="btn-add" style="flex: 1; font-size: 0.95rem; padding: 8px; border-radius: 12px;" onclick="addShortcut()">Save</button>
                     <button class="btn-clean" style="flex: 1;" onclick="toggleShortcutInputs()">Cancel</button>
@@ -354,7 +354,7 @@
             </div>
             <div id="notepad-edit-view" style="display: none; flex-direction: column; flex-grow: 1;">
                 <div class="note-edit-header">
-                    <input type="text" id="note-title-input" class="note-title-input" placeholder="Note Title...">
+                    <input type="text" id="note-title-input" aria-label="Note Title" class="note-title-input" placeholder="Note Title...">
                     <div class="color-picker-row">
                         <span class="color-dot bg-none active" id="c-none" onclick="setNoteColor('none')" title="Default"></span>
                         <span class="color-dot bg-blue" id="c-blue" onclick="setNoteColor('blue')" title="Blue"></span>
@@ -366,7 +366,7 @@
                 </div>
 
                 <div class="editor-container">
-                    <textarea id="notepad-input" placeholder="Write your note here...&#10;Auto-saves instantly."></textarea>
+                    <textarea id="notepad-input" aria-label="Note Content" placeholder="Write your note here...&#10;Auto-saves instantly."></textarea>
                 </div>
 
                 <div class="note-status-bar">
