@@ -1407,8 +1407,44 @@ function refreshCurrentNews() {
 
 const fetchWithTimeout = (url, ms) => Promise.race([ fetch(url), new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms)) ]);
 
-async function fetchNewsData(category, forceRefresh) {
+function parseRssXml(xmlText, sourceName) {
     let items = [];
+    const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlText, "text/xml");
+
+    const nodes = Array.from(xml.querySelectorAll("item")).slice(0, 9);
+    if(nodes.length === 0) throw new Error("No XML items");
+
+    nodes.forEach(item => {
+        let title = item.querySelector("title")?.textContent || "News Article";
+        let link = item.querySelector("link")?.textContent || "#";
+        let pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
+        let desc = item.querySelector("description")?.textContent || "";
+        let content = item.getElementsByTagNameNS("*", "encoded")[0]?.textContent || "";
+
+        let imgUrl = fallbackImg;
+        let enclosure = item.querySelector("enclosure");
+        let mediaContent = item.getElementsByTagNameNS("*", "content")[0];
+
+        if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
+        else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
+        else {
+            let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (match) imgUrl = match[1];
+        }
+
+        let dateObj = new Date(pubDate.replace(/-/g, '/'));
+        let hAgo = Math.floor((Date.now() - dateObj.getTime()) / 3600000);
+        let timeStr = isNaN(hAgo) ? "Recently" : (hAgo <= 0 ? "Just now" : hAgo + "h ago");
+
+        items.push({ title, link, imgUrl, source: sourceName, timeStr });
+    });
+    return items;
+}
+
+async function fetchNewsData(category, forceRefresh) {
     const feeds = {
         'dailystar': 'https://www.thedailystar.net/frontpage/rss.xml',
         'prothomalo': 'https://en.prothomalo.com/feed/',
@@ -1427,8 +1463,6 @@ async function fetchNewsData(category, forceRefresh) {
     };
 
     let targetFeed = feeds[category];
-    const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
-
     const MY_PRIVATE_PROXY = "https://script.google.com/macros/s/AKfycbwRKENOew0rgwnfbdUOYweWKLJkSeEenJD8d_pd_I2hpH6o9pQELRMCoRe00gS3PTIaTg/exec";
 
     try {
@@ -1439,37 +1473,7 @@ async function fetchNewsData(category, forceRefresh) {
         if (!res.ok) throw new Error("Proxy failed");
 
         const xmlText = await res.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlText, "text/xml");
-
-        const nodes = Array.from(xml.querySelectorAll("item")).slice(0, 9);
-        if(nodes.length === 0) throw new Error("No XML items");
-
-        nodes.forEach(item => {
-            let title = item.querySelector("title")?.textContent || "News Article";
-            let link = item.querySelector("link")?.textContent || "#";
-            let pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
-            let desc = item.querySelector("description")?.textContent || "";
-            let content = item.getElementsByTagNameNS("*", "encoded")[0]?.textContent || "";
-
-            let imgUrl = fallbackImg;
-            let enclosure = item.querySelector("enclosure");
-            let mediaContent = item.getElementsByTagNameNS("*", "content")[0];
-
-            if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
-            else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
-            else {
-                let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
-                if (match) imgUrl = match[1];
-            }
-
-            let dateObj = new Date(pubDate.replace(/-/g, '/'));
-            let hAgo = Math.floor((Date.now() - dateObj.getTime()) / 3600000);
-            let timeStr = isNaN(hAgo) ? "Recently" : (hAgo <= 0 ? "Just now" : hAgo + "h ago");
-
-            items.push({ title, link, imgUrl, source: sourcesNames[category], timeStr });
-        });
-        return items;
+        return parseRssXml(xmlText, sourcesNames[category]);
     } catch (error) {
         console.error("News fetch error:", error);
         throw error;
