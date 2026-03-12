@@ -159,6 +159,11 @@ function openSettings() {
     document.getElementById('set-theme').value = dashSettings.themeStyle || 'glass';
     document.getElementById('set-accent').value = dashSettings.accentColor || '#0066cc';
 
+    // Cloud Sync Settings
+    let syncData = JSON.parse(localStorage.getItem('dashboardGistSync')) || { pat: '', gistId: '' };
+    document.getElementById('set-gist-pat').value = syncData.pat || '';
+    document.getElementById('set-gist-id').value = syncData.gistId || '';
+
     // Layout Toggles
     document.getElementById('set-compact').checked = dashSettings.compactMode;
     Object.keys(defaultVis).forEach(k => {
@@ -193,6 +198,13 @@ function saveSettings() {
     // Visuals
     dashSettings.themeStyle = document.getElementById('set-theme').value;
     dashSettings.accentColor = document.getElementById('set-accent').value;
+
+    // Cloud Sync
+    let syncData = {
+        pat: document.getElementById('set-gist-pat').value.trim(),
+        gistId: document.getElementById('set-gist-id').value.trim()
+    };
+    localStorage.setItem('dashboardGistSync', JSON.stringify(syncData));
 
     // Layout Toggles
     dashSettings.compactMode = document.getElementById('set-compact').checked;
@@ -260,6 +272,119 @@ function importData(event) {
         } catch(err) { alert("Invalid backup file."); }
     };
     reader.readAsText(file);
+}
+
+// --- CLOUD SYNC ENGINE (GitHub Gist) ---
+async function uploadToGist() {
+    const pat = document.getElementById('set-gist-pat').value.trim();
+    const gistId = document.getElementById('set-gist-id').value.trim();
+    const statusEl = document.getElementById('gist-sync-status');
+
+    if (!pat) {
+        statusEl.innerHTML = '<span style="color:var(--danger)">GitHub PAT is required to sync.</span>';
+        return;
+    }
+
+    statusEl.innerHTML = '<i class="ph ph-spinner" style="animation: spin 1s linear infinite;"></i> Syncing to cloud...';
+
+    const data = Object.entries(STORAGE_KEYS).reduce((acc, [key, storageKey]) => {
+        acc[key] = localStorage.getItem(storageKey);
+        return acc;
+    }, {});
+
+    const payload = {
+        description: "My Daily Dashboard Backup",
+        public: false,
+        files: {
+            "dashboard_backup.json": {
+                content: JSON.stringify(data, null, 2)
+            }
+        }
+    };
+
+    try {
+        let url = 'https://api.github.com/gists';
+        let method = 'POST';
+
+        if (gistId) {
+            url += `/${gistId}`;
+            method = 'PATCH';
+        }
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Authorization': `token ${pat}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`GitHub API Error: ${response.status}`);
+
+        const resData = await response.json();
+
+        // Auto-save the new Gist ID if it was created
+        if (!gistId && resData.id) {
+            document.getElementById('set-gist-id').value = resData.id;
+            const syncData = { pat, gistId: resData.id };
+            localStorage.setItem('dashboardGistSync', JSON.stringify(syncData));
+        }
+
+        statusEl.innerHTML = '<span style="color:var(--success)"><i class="ph ph-check-circle"></i> Successfully synced to Gist!</span>';
+        setTimeout(() => { statusEl.innerHTML = ''; }, 3000);
+
+    } catch (error) {
+        console.error("Gist sync error:", error);
+        statusEl.innerHTML = `<span style="color:var(--danger)"><i class="ph ph-warning-circle"></i> Sync failed. Check PAT and Gist ID.</span>`;
+    }
+}
+
+async function downloadFromGist() {
+    const pat = document.getElementById('set-gist-pat').value.trim();
+    const gistId = document.getElementById('set-gist-id').value.trim();
+    const statusEl = document.getElementById('gist-sync-status');
+
+    if (!pat || !gistId) {
+        statusEl.innerHTML = '<span style="color:var(--danger)">Both PAT and Gist ID are required to load.</span>';
+        return;
+    }
+
+    statusEl.innerHTML = '<i class="ph ph-spinner" style="animation: spin 1s linear infinite;"></i> Loading from cloud...';
+
+    try {
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: {
+                'Authorization': `token ${pat}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        if (!response.ok) throw new Error(`GitHub API Error: ${response.status}`);
+
+        const resData = await response.json();
+        const fileContent = resData.files && resData.files["dashboard_backup.json"] ? resData.files["dashboard_backup.json"].content : null;
+
+        if (!fileContent) throw new Error("Backup file not found in Gist");
+
+        const parsedData = JSON.parse(fileContent);
+
+        Object.entries(STORAGE_KEYS).forEach(([key, storageKey]) => {
+            if (parsedData[key]) localStorage.setItem(storageKey, parsedData[key]);
+        });
+
+        // Also save the sync config so it's persisted on reload
+        const syncData = { pat, gistId };
+        localStorage.setItem('dashboardGistSync', JSON.stringify(syncData));
+
+        statusEl.innerHTML = '<span style="color:var(--success)"><i class="ph ph-check-circle"></i> Successfully loaded! Reloading...</span>';
+        setTimeout(() => { location.reload(); }, 1000);
+
+    } catch (error) {
+        console.error("Gist load error:", error);
+        statusEl.innerHTML = `<span style="color:var(--danger)"><i class="ph ph-warning-circle"></i> Load failed. Check PAT and Gist ID.</span>`;
+    }
 }
 
 
