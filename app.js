@@ -434,8 +434,9 @@ function renderBankApps() {
     
     if (bankAppsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px; grid-column: span 2;">No tools added.</div>'; triggerMasonryUpdate(); return; }
     
+    let html = '';
     bankAppsArr.forEach((app, i) => {
-        grid.innerHTML += `
+        html += `
             <div class="bank-app-wrapper" draggable="true" ondragstart="handleSubDragStart(event, 'bank')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'bank', bankAppsArr, saveBankApps, renderBankApps)" ondragend="handleSubDragEnd(event)">
                 <a href="${app.path}" target="_blank" class="app-tile">
                     <i class="ph-fill ${app.icon}"></i>
@@ -444,6 +445,7 @@ function renderBankApps() {
                 <button class="delete-btn bank-del-btn" onclick="deleteBankApp(${i}, event)" title="Remove Tool">&times;</button>
             </div>`;
     });
+    grid.innerHTML = html;
     triggerMasonryUpdate();
 }
 
