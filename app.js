@@ -612,7 +612,36 @@ function renderTornStats(data) {
     const frag = document.createDocumentFragment();
     const formatNum = (num) => typeof num === 'number' ? num.toLocaleString('en-US') : (num || '--');
 
-    const addStat = (labelStr, valStr, colorClass = '') => {
+    const addHeader = (title, iconClass) => {
+        const header = document.createElement('div');
+        header.style.gridColumn = "span 2";
+        header.style.display = "flex";
+        header.style.alignItems = "center";
+        header.style.gap = "6px";
+        header.style.marginTop = frag.childNodes.length > 0 ? "10px" : "0";
+        header.style.marginBottom = "5px";
+        header.style.color = "var(--text-muted)";
+        header.style.fontSize = "0.75rem";
+        header.style.fontWeight = "800";
+        header.style.textTransform = "uppercase";
+        header.style.letterSpacing = "1px";
+        header.style.borderBottom = "1px solid var(--glass-border)";
+        header.style.paddingBottom = "4px";
+
+        if(iconClass) {
+            const i = document.createElement('i');
+            i.className = iconClass;
+            i.style.fontSize = "1rem";
+            header.appendChild(i);
+        }
+
+        const txt = document.createElement('span');
+        txt.textContent = title;
+        header.appendChild(txt);
+        frag.appendChild(header);
+    };
+
+    const addStat = (labelStr, valStr, highlight = false) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'stat-item';
         const label = document.createElement('span');
@@ -620,45 +649,88 @@ function renderTornStats(data) {
         label.textContent = labelStr;
         const val = document.createElement('span');
         val.className = 'stat-val';
-        if (colorClass) val.classList.add(colorClass);
+        if (highlight) {
+            val.style.color = "var(--accent)";
+            val.style.fontWeight = "900";
+        }
         val.textContent = valStr;
         wrapper.appendChild(label);
         wrapper.appendChild(val);
         frag.appendChild(wrapper);
     };
 
-    // --- POINTS & JOB POINTS ---
-    if (data.points !== undefined) addStat('Points', formatNum(data.points), 'color-accent');
-    if (data.jobpoints && data.jobpoints.jobs) {
-        let totalJp = 0;
-        for (let jp in data.jobpoints.jobs) totalJp += data.jobpoints.jobs[jp];
-        addStat('Job Points', formatNum(totalJp));
-    } else if (data.jobpoints && data.jobpoints.companies) {
-        let totalJp = 0;
-        for (let cp in data.jobpoints.companies) totalJp += data.jobpoints.companies[cp];
-        addStat('Job Points', formatNum(totalJp));
+    // --- GENERAL ---
+    let hasPoints = data.points !== undefined;
+    let hasJp = (data.jobpoints && (data.jobpoints.jobs || data.jobpoints.companies));
+
+    if (hasPoints || hasJp) {
+        addHeader('General & Assets', 'ph-fill ph-coins');
+        if (hasPoints) addStat('Points', formatNum(data.points), true);
+        if (hasJp) {
+            let totalJp = 0;
+            if(data.jobpoints.jobs) for (let jp in data.jobpoints.jobs) totalJp += data.jobpoints.jobs[jp];
+            if(data.jobpoints.companies) for (let cp in data.jobpoints.companies) totalJp += data.jobpoints.companies[cp];
+            addStat('Job Points', formatNum(totalJp));
+        }
     }
 
     // --- WORKING STATS ---
-    if (data.manual_labor !== undefined) addStat('Manual Labor', formatNum(data.manual_labor));
-    if (data.intelligence !== undefined) addStat('Intelligence', formatNum(data.intelligence));
-    if (data.endurance !== undefined) addStat('Endurance', formatNum(data.endurance));
+    let hasWork = data.manual_labor !== undefined || data.intelligence !== undefined || data.endurance !== undefined;
+    if (hasWork) {
+        addHeader('Working Stats', 'ph-fill ph-wrench');
+        if (data.manual_labor !== undefined) addStat('Manual Labor', formatNum(data.manual_labor));
+        if (data.intelligence !== undefined) addStat('Intelligence', formatNum(data.intelligence));
+        if (data.endurance !== undefined) addStat('Endurance', formatNum(data.endurance));
+    }
 
     // --- BATTLE STATS (Effective Values) ---
-    // Torn API structure for battlestats:
-    // data.strength, data.speed, data.dexterity, data.defense (can be base or effective depending on the API changes, usually they are the effective total).
-    // Sometimes it's data.strength_info.effective or just data.strength
-
     let str = data.strength || (data.strength_info ? data.strength_info.effective : undefined);
     let def = data.defense || (data.defense_info ? data.defense_info.effective : undefined);
     let spd = data.speed || (data.speed_info ? data.speed_info.effective : undefined);
     let dex = data.dexterity || (data.dexterity_info ? data.dexterity_info.effective : undefined);
 
-    if (str !== undefined) addStat('Strength', formatNum(str));
-    if (def !== undefined) addStat('Defense', formatNum(def));
-    if (spd !== undefined) addStat('Speed', formatNum(spd));
-    if (dex !== undefined) addStat('Dexterity', formatNum(dex));
-    if (data.total_stats !== undefined) addStat('Total Stats', formatNum(data.total_stats), 'color-accent');
+    let hasBattle = str !== undefined || def !== undefined || spd !== undefined || dex !== undefined || data.total_stats !== undefined;
+    if (hasBattle) {
+        addHeader('Battle Stats (Effective)', 'ph-fill ph-sword');
+        if (str !== undefined) addStat('Strength', formatNum(str));
+        if (def !== undefined) addStat('Defense', formatNum(def));
+        if (spd !== undefined) addStat('Speed', formatNum(spd));
+        if (dex !== undefined) addStat('Dexterity', formatNum(dex));
+
+        let totalStat = data.total_stats;
+        if (totalStat === undefined && str !== undefined && def !== undefined && spd !== undefined && dex !== undefined) {
+             totalStat = str + def + spd + dex;
+        }
+        if (totalStat !== undefined) {
+            const wrapper = document.createElement('div');
+            wrapper.style.gridColumn = "span 2";
+            wrapper.style.display = "flex";
+            wrapper.style.justifyContent = "space-between";
+            wrapper.style.alignItems = "center";
+            wrapper.style.background = "var(--glass-bg)";
+            wrapper.style.padding = "8px 12px";
+            wrapper.style.borderRadius = "12px";
+            wrapper.style.marginTop = "5px";
+            wrapper.style.border = "1px solid var(--accent)";
+
+            const label = document.createElement('span');
+            label.style.fontSize = "0.75rem";
+            label.style.fontWeight = "800";
+            label.style.textTransform = "uppercase";
+            label.style.color = "var(--text-muted)";
+            label.textContent = "Total Stats";
+
+            const val = document.createElement('span');
+            val.style.fontSize = "1.1rem";
+            val.style.fontWeight = "900";
+            val.style.color = "var(--accent)";
+            val.textContent = formatNum(totalStat);
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(val);
+            frag.appendChild(wrapper);
+        }
+    }
 
     if(frag.childNodes.length === 0) {
         const noStats = document.createElement('div');
