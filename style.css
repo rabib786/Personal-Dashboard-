@@ -10,15 +10,15 @@
     --glass-bg: rgba(255, 255, 255, var(--glass-opacity));
     --glass-border: rgba(255, 255, 255, 0.4);
     --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    
+
     --main-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    
+
     --text-main: #1d1d1f;
     --text-muted: #515154;
-    
+
     --accent: #0066cc;
     --accent-hover: #005bb5;
-    
+
     --danger: #ff3b30;
     --danger-light: rgba(255, 59, 48, 0.15);
     --warning: #ff9500;
@@ -31,7 +31,7 @@
 
 /* Dark Mode Fallback */
 [data-theme="dark"] {
-    --glass-opacity: 0.65; 
+    --glass-opacity: 0.65;
     --glass-bg: rgba(20, 20, 25, var(--glass-opacity));
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
@@ -43,7 +43,7 @@
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]):not([data-theme-style="cyberpunk"]):not([data-theme-style="terminal"]):not([data-theme-style="pixel"]) {
-        --glass-opacity: 0.65; 
+        --glass-opacity: 0.65;
         --glass-bg: rgba(20, 20, 25, var(--glass-opacity));
         --glass-border: rgba(255, 255, 255, 0.08);
         --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
@@ -117,13 +117,13 @@ input, textarea, select, button { font-family: inherit; }
 @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } .span-3 { grid-column: span 1; } }
 
 /* Main Card Setup */
-.card { 
-    background: var(--glass-bg); 
-    backdrop-filter: blur(var(--glass-blur)); 
-    -webkit-backdrop-filter: blur(var(--glass-blur)); 
-    border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 25px; 
-    box-shadow: var(--glass-shadow); display: flex; flex-direction: column; 
-    transition: transform 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease, opacity 0.2s; 
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 25px;
+    box-shadow: var(--glass-shadow); display: flex; flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease, opacity 0.2s;
     height: max-content; min-width: 0; max-width: 100%; overflow: hidden;
 }
 .card:hover:not(.dragging) { transform: translateY(-2px); box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.15); }
@@ -131,7 +131,7 @@ input, textarea, select, button { font-family: inherit; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; transition: margin-bottom 0.3s; }
 .card-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; white-space: nowrap; transition: font-size 0.3s;}
 
-.drag-header-group { display: flex; align-items: center; min-width: 0; } 
+.drag-header-group { display: flex; align-items: center; min-width: 0; }
 .drag-handle { cursor: grab; color: var(--text-muted); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; margin-right: 10px; transition: all 0.2s; font-size: 1.5rem; flex-shrink: 0; }
 .drag-handle:hover { background: var(--inner-bg); color: var(--text-main); }
 .drag-handle:active { cursor: grabbing; }
@@ -182,9 +182,9 @@ input, textarea, select, button { font-family: inherit; }
 /* --- CUSTOM BANK APPS MODULE --- */
 .bank-apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
 .bank-app-wrapper { position: relative; display: flex; flex-direction: column; }
-.app-tile { 
-    background: var(--inner-bg); border: 1px solid var(--glass-border); border-radius: 16px; 
-    padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; 
+.app-tile {
+    background: var(--inner-bg); border: 1px solid var(--glass-border); border-radius: 16px;
+    padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px;
     text-decoration: none; color: var(--text-main); transition: all 0.2s; cursor: pointer; flex-grow: 1;
 }
 .app-tile:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); background: var(--glass-bg); }
@@ -240,7 +240,7 @@ input, textarea, select, button { font-family: inherit; }
 .location-text { color: var(--text-muted); font-size: 0.75rem; text-align: right; margin: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: color 0.2s;}
 .location-text:hover { color: var(--accent); }
 .current-weather-main { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px; }
-.weather-icon-large { font-size: 3.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); transition: font-size 0.3s; } 
+.weather-icon-large { font-size: 3.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); transition: font-size 0.3s; }
 .weather-temp-box { display: flex; flex-direction: column; }
 .weather-temp { font-size: 2.8rem; font-weight: 800; letter-spacing: -2px; line-height: 1; transition: font-size 0.3s;}
 .weather-desc { font-size: 1rem; font-weight: 600; margin-top: 5px; color: var(--accent); }
@@ -284,7 +284,7 @@ input, textarea, select, button { font-family: inherit; }
 .todo-item { display: flex; align-items: center; padding: 10px; border-radius: 10px; margin-bottom: 6px; background: transparent; transition: all 0.2s; border: 1px solid transparent; }
 .todo-item:hover { background: var(--inner-bg); border-color: var(--glass-border); }
 .todo-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
-.todo-text { flex-grow: 1; margin-left: 10px; cursor: pointer; user-select: none; font-weight: 500; font-size: 0.95rem; word-break: break-word; } 
+.todo-text { flex-grow: 1; margin-left: 10px; cursor: pointer; user-select: none; font-weight: 500; font-size: 0.95rem; word-break: break-word; }
 .todo-item.completed .todo-text { text-decoration: line-through; color: var(--text-muted); opacity: 0.7; }
 .delete-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.2rem; padding: 0 5px; opacity: 0; transition: opacity 0.2s; flex-shrink: 0; }
 .todo-item:hover .delete-btn { opacity: 1; }
@@ -293,7 +293,7 @@ input, textarea, select, button { font-family: inherit; }
 .shortcuts-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; width: 100%; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);}
 .shortcut-input { min-width: 0; width: 100%; padding: 10px 12px; border: 1px solid var(--glass-border); border-radius: 12px; font-size: 0.95rem; background: var(--inner-bg); color: var(--text-main); outline: none; transition: border-color 0.2s; }
 .shortcut-input:focus { border-color: var(--accent); }
-.shortcuts-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; max-height: 300px; width: 100%; padding-top: 5px; } 
+.shortcuts-grid { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; max-height: 300px; width: 100%; padding-top: 5px; }
 .shortcut-item { background: var(--inner-bg); padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: flex-start; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; position: relative; text-decoration: none; color: var(--text-main); }
 .shortcut-item:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 .shortcut-icon-wrapper { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: transparent; flex-shrink: 0; }
@@ -351,7 +351,7 @@ input, textarea, select, button { font-family: inherit; }
 .news-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
 
 /* News Hub Specifics */
-.news-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; } 
+.news-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; }
 .news-item { background: var(--inner-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--glass-border); transition: transform 0.2s, box-shadow 0.2s; display: flex; gap: 15px; text-decoration: none; align-items: flex-start; }
 .news-item:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); border-color: var(--accent); }
 .news-image-wrapper { width: 120px; height: 90px; border-radius: 12px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: var(--glass-bg); display: flex; align-items: center; justify-content: center; }
@@ -402,12 +402,12 @@ input, textarea, select, button { font-family: inherit; }
 }
 [data-theme-style="cyberpunk"] body {
     background: #0b0214 !important;
-    background-image: 
+    background-image:
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
     background-size: 30px 30px !important;
 }
-[data-theme-style="cyberpunk"] .card, 
+[data-theme-style="cyberpunk"] .card,
 [data-theme-style="cyberpunk"] .modal-content {
     border: 2px solid var(--accent);
     clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
@@ -436,18 +436,18 @@ input, textarea, select, button { font-family: inherit; }
 [data-theme-style="terminal"] body {
     background: #000 !important;
 }
-[data-theme-style="terminal"] .card, 
+[data-theme-style="terminal"] .card,
 [data-theme-style="terminal"] .modal-content {
     border-style: dashed;
     border-width: 1px;
 }
-[data-theme-style="terminal"] input, 
+[data-theme-style="terminal"] input,
 [data-theme-style="terminal"] select,
 [data-theme-style="terminal"] .form-control {
     border-style: dashed;
 }
 /* Dim muted text visually via opacity since colors are locked to Accent */
-[data-theme-style="terminal"] .text-muted, 
+[data-theme-style="terminal"] .text-muted,
 [data-theme-style="terminal"] .weather-desc,
 [data-theme-style="terminal"] .fc-min,
 [data-theme-style="terminal"] .holiday-date {
