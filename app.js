@@ -1298,7 +1298,9 @@ function deleteShortcut(i, event) { event.preventDefault(); event.stopPropagatio
 
 // --- 7. NORMAL NOTEPAD ---
 let notesArr = []; let currentNoteId = null;
+let colorDotCache = null;
 function initNotesEngine() {
+    colorDotCache = document.querySelectorAll('.color-dot');
     let savedNotes = JSON.parse(localStorage.getItem('dashboardNotes'));
     if (!savedNotes) { notesArr = [{ id: Date.now(), title: 'Welcome', content: 'Type your quick notes here.', lastEdited: Date.now(), color: 'none', pinned: false }]; saveNotesArr(); }
     else { notesArr = savedNotes.map(n => ({...n, color: n.color || 'none', pinned: n.pinned || false})); }
@@ -1349,10 +1351,16 @@ function renderNotesList() {
 }
 
 function createNewNote() { const newId = Date.now(); notesArr.push({ id: newId, title: '', content: '', lastEdited: newId, color: 'none', pinned: false }); saveNotesArr(); document.getElementById('note-search').value = ""; openNote(newId); }
+function updateNoteColorUI(color) {
+    if (!colorDotCache || colorDotCache.length === 0) colorDotCache = document.querySelectorAll('.color-dot');
+    colorDotCache.forEach(d => d.classList.remove('active'));
+    const activeDot = document.getElementById(`c-${color}`);
+    if (activeDot) activeDot.classList.add('active');
+}
 function openNote(id) {
     currentNoteId = id; const note = notesArr.find(n => n.id === id); if (!note) return;
     document.getElementById('note-title-input').value = note.title; document.getElementById('notepad-input').value = note.content;
-    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); document.getElementById(`c-${note.color}`).classList.add('active');
+    updateNoteColorUI(note.color);
     updateCharCount();
     document.getElementById('notepad-header-title').innerHTML = '<i class="ph ph-notepad" style="margin-right: 8px;"></i>Edit Note';
     document.getElementById('notepad-list-actions').style.display = 'none'; document.getElementById('notepad-list-view').style.display = 'none';
@@ -1380,7 +1388,7 @@ function autoSaveNote() {
 }
 function setNoteColor(color) {
     if (!currentNoteId) return; const idx = notesArr.findIndex(n => n.id === currentNoteId);
-    if (idx > -1) { notesArr[idx].color = color; document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); document.getElementById(`c-${color}`).classList.add('active'); autoSaveNote(); }
+    if (idx > -1) { notesArr[idx].color = color; updateNoteColorUI(color); autoSaveNote(); }
 }
 function togglePin(id, event) { event.stopPropagation(); let note = notesArr.find(n => n.id === id); if(note) { note.pinned = !note.pinned; saveNotesArr(); renderNotesList(); } }
 function deleteNote(id, event) { event.stopPropagation(); if(confirm("Delete this note?")) { notesArr = notesArr.filter(n => n.id !== id); saveNotesArr(); renderNotesList(); } }
