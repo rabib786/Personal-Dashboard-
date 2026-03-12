@@ -491,20 +491,49 @@ function renderBankApps() {
     if(!grid) return;
     grid.innerHTML = '';
 
-    if (bankAppsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px; grid-column: span 2;">No tools added.</div>'; triggerMasonryUpdate(); return; }
+    if (bankAppsArr.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px; grid-column: span 2;';
+        empty.textContent = 'No tools added.';
+        grid.appendChild(empty);
+        triggerMasonryUpdate();
+        return;
+    }
 
-    let html = '';
     bankAppsArr.forEach((app, i) => {
-        html += `
-            <div class="bank-app-wrapper" draggable="true" ondragstart="handleSubDragStart(event, 'bank')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'bank', bankAppsArr, saveBankApps, renderBankApps)" ondragend="handleSubDragEnd(event)">
-                <a href="${app.path}" target="_blank" class="app-tile">
-                    <i class="ph-fill ${app.icon}"></i>
-                    <span>${escapeHtml(app.name)}</span>
-                </a>
-                <button class="delete-btn bank-del-btn" aria-label="Remove Tool" onclick="deleteBankApp(${i}, event)" title="Remove Tool">&times;</button>
-            </div>`;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'bank-app-wrapper';
+        wrapper.draggable = true;
+        wrapper.ondragstart = (e) => handleSubDragStart(e, 'bank');
+        wrapper.ondragover = (e) => handleSubDragOver(e);
+        wrapper.ondrop = (e) => handleSubDrop(e, 'bank', bankAppsArr, saveBankApps, renderBankApps);
+        wrapper.ondragend = (e) => handleSubDragEnd(e);
+
+        const link = document.createElement('a');
+        link.href = safeUrl(app.path);
+        link.target = '_blank';
+        link.className = 'app-tile';
+
+        const icon = document.createElement('i');
+        icon.className = `ph-fill ${app.icon}`;
+
+        const name = document.createElement('span');
+        name.textContent = app.name;
+
+        link.appendChild(icon);
+        link.appendChild(name);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn bank-del-btn';
+        delBtn.setAttribute('aria-label', 'Remove Tool');
+        delBtn.title = 'Remove Tool';
+        delBtn.innerHTML = '&times;';
+        delBtn.onclick = (e) => deleteBankApp(i, e);
+
+        wrapper.appendChild(link);
+        wrapper.appendChild(delBtn);
+        grid.appendChild(wrapper);
     });
-    grid.innerHTML = html;
     triggerMasonryUpdate();
 }
 
@@ -1257,6 +1286,13 @@ function renderHolidayList() {
 
 function escapeHtml(u) { return (u || '').replace(/[&<"'>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]); }
 
+function safeUrl(u, fallback = '#') {
+    if (!u) return fallback;
+    const trimmed = u.trim();
+    if (trimmed.toLowerCase().startsWith('javascript:')) return fallback;
+    return trimmed;
+}
+
 // --- 6. QUICK LINKS ---
 let shortcutsArr = JSON.parse(localStorage.getItem('dashboardBookmarks')) || [];
 function toggleShortcutInputs() {
@@ -1271,24 +1307,76 @@ function renderShortcuts() {
     const grid = document.getElementById('shortcuts-grid');
     if(!grid) return;
 
-    if (shortcutsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">No links added yet.</div>'; triggerMasonryUpdate(); return; }
+    if (shortcutsArr.length === 0) {
+        grid.innerHTML = '';
+        const empty = document.createElement('div');
+        empty.style.cssText = 'color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;';
+        empty.textContent = 'No links added yet.';
+        grid.appendChild(empty);
+        triggerMasonryUpdate();
+        return;
+    }
 
-    let html = '';
+    grid.innerHTML = '';
     shortcutsArr.forEach((sc, i) => {
         let domain = sc.path.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
         let favUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-        let onErrorFallback = `this.outerHTML='<i class=\\'ph-fill ph-globe shortcut-fallback-icon\\'></i>'`;
-        html += `
-            <div class="shortcut-item" draggable="true" ondragstart="handleSubDragStart(event, 'link')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'link', shortcutsArr, saveShortcuts, renderShortcuts)" ondragend="handleSubDragEnd(event)">
-                <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
-                <a href="${sc.path}" target="_blank" style="display:flex; align-items:center; gap:8px; flex-grow:1; text-decoration:none; color:inherit;">
-                    <div class="shortcut-icon-wrapper"><img src="${favUrl}" alt="" onerror="${onErrorFallback}"></div>
-                    <div class="shortcut-info"><span class="shortcut-name" title="${escapeHtml(sc.name)}">${escapeHtml(sc.name)}</span></div>
-                </a>
-                <button class="delete-btn" aria-label="Remove Link" onclick="deleteShortcut(${i}, event)" title="Remove Link">&times;</button>
-            </div>`;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'shortcut-item';
+        wrapper.draggable = true;
+        wrapper.ondragstart = (e) => handleSubDragStart(e, 'link');
+        wrapper.ondragover = (e) => handleSubDragOver(e);
+        wrapper.ondrop = (e) => handleSubDrop(e, 'link', shortcutsArr, saveShortcuts, renderShortcuts);
+        wrapper.ondragend = (e) => handleSubDragEnd(e);
+
+        const handle = document.createElement('div');
+        handle.className = 'sub-item-drag-handle';
+        handle.title = 'Drag to reorder';
+        const handleIcon = document.createElement('i');
+        handleIcon.className = 'ph ph-dots-six-vertical';
+        handle.appendChild(handleIcon);
+
+        const link = document.createElement('a');
+        link.href = safeUrl(sc.path);
+        link.target = '_blank';
+        link.style.cssText = 'display:flex; align-items:center; gap:8px; flex-grow:1; text-decoration:none; color:inherit;';
+
+        const iconWrapper = document.createElement('div');
+        iconWrapper.className = 'shortcut-icon-wrapper';
+        const img = document.createElement('img');
+        img.src = favUrl;
+        img.alt = '';
+        img.onerror = function() {
+            const fallback = document.createElement('i');
+            fallback.className = 'ph-fill ph-globe shortcut-fallback-icon';
+            this.parentElement.replaceChild(fallback, this);
+        };
+        iconWrapper.appendChild(img);
+
+        const info = document.createElement('div');
+        info.className = 'shortcut-info';
+        const name = document.createElement('span');
+        name.className = 'shortcut-name';
+        name.title = sc.name;
+        name.textContent = sc.name;
+        info.appendChild(name);
+
+        link.appendChild(iconWrapper);
+        link.appendChild(info);
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.setAttribute('aria-label', 'Remove Link');
+        delBtn.title = 'Remove Link';
+        delBtn.innerHTML = '&times;';
+        delBtn.onclick = (e) => deleteShortcut(i, e);
+
+        wrapper.appendChild(handle);
+        wrapper.appendChild(link);
+        wrapper.appendChild(delBtn);
+        grid.appendChild(wrapper);
     });
-    grid.innerHTML = html;
     triggerMasonryUpdate();
 }
 function addShortcut() {
@@ -1521,15 +1609,43 @@ async function fetchNewsData(category, forceRefresh) {
 
 function renderNewsItems(items, container) {
     const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
-    let html = '<div class="news-list">';
+
+    container.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'news-list';
+
     items.forEach(p => {
-        html += `
-            <a href="${p.link}" target="_blank" class="news-item">
-                <div class="news-image-wrapper"><img src="${p.imgUrl}" class="news-image" alt="Img" onerror="this.src='${fallbackImg}'"></div>
-                <div class="news-content"><div class="news-title">${escapeHtml(p.title)}</div><div class="news-source">${p.source} &bull; ${p.timeStr}</div></div>
-            </a>`;
+        const item = document.createElement('a');
+        item.href = safeUrl(p.link);
+        item.target = '_blank';
+        item.className = 'news-item';
+
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'news-image-wrapper';
+        const img = document.createElement('img');
+        img.src = safeUrl(p.imgUrl, fallbackImg);
+        img.className = 'news-image';
+        img.alt = 'Img';
+        img.onerror = function() { this.src = fallbackImg; };
+        imgWrapper.appendChild(img);
+
+        const content = document.createElement('div');
+        content.className = 'news-content';
+        const title = document.createElement('div');
+        title.className = 'news-title';
+        title.textContent = p.title;
+        const source = document.createElement('div');
+        source.className = 'news-source';
+        source.textContent = `${p.source} \u2022 ${p.timeStr}`;
+
+        content.appendChild(title);
+        content.appendChild(source);
+        item.appendChild(imgWrapper);
+        item.appendChild(content);
+        grid.appendChild(item);
     });
-    container.innerHTML = html + '</div>';
+
+    container.appendChild(grid);
     triggerMasonryUpdate();
     setTimeout(triggerMasonryUpdate, 800);
 }
@@ -1538,20 +1654,27 @@ function renderNewsTabs() {
     const container = document.getElementById('news-tabs-container');
     if (!container) return;
 
-    let html = `
-        <div class="news-tab ${currentNewsCategory === 'dailystar' ? 'active' : ''}" id="tab-dailystar" onclick="fetchNews('dailystar')">The Daily Star</div>
-        <div class="news-tab ${currentNewsCategory === 'prothomalo' ? 'active' : ''}" id="tab-prothomalo" onclick="fetchNews('prothomalo')">Prothom Alo</div>
-        <div class="news-tab ${currentNewsCategory === 'business' ? 'active' : ''}" id="tab-business" onclick="fetchNews('business')">Business</div>
-        <div class="news-tab ${currentNewsCategory === 'sports' ? 'active' : ''}" id="tab-sports" onclick="fetchNews('sports')">Sports</div>
-        <div class="news-tab ${currentNewsCategory === 'global' ? 'active' : ''}" id="tab-global" onclick="fetchNews('global')">Global (Al Jazeera)</div>
-    `;
+    container.innerHTML = '';
+
+    const tabs = [
+        { id: 'dailystar', name: 'The Daily Star' },
+        { id: 'prothomalo', name: 'Prothom Alo' },
+        { id: 'business', name: 'Business' },
+        { id: 'sports', name: 'Sports' },
+        { id: 'global', name: 'Global (Al Jazeera)' }
+    ];
 
     let customSources = JSON.parse(localStorage.getItem('dashboardCustomRssSources')) || [];
-    customSources.forEach(src => {
-        html += `<div class="news-tab ${currentNewsCategory === src.id ? 'active' : ''}" id="tab-${src.id}" onclick="fetchNews('${src.id}')">${escapeHtml(src.name)}</div>`;
-    });
+    const allTabs = [...tabs, ...customSources];
 
-    container.innerHTML = html;
+    allTabs.forEach(src => {
+        const tab = document.createElement('div');
+        tab.className = `news-tab ${currentNewsCategory === src.id ? 'active' : ''}`;
+        tab.id = `tab-${src.id}`;
+        tab.textContent = src.name;
+        tab.onclick = function() { fetchNews(src.id); };
+        container.appendChild(tab);
+    });
 }
 
 async function fetchNews(category, forceRefresh = false) {
