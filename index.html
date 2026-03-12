@@ -4,31 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Daily Dashboard</title>
-    
+
     <link rel="manifest" href="manifest.json">
-    
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="fab-container">
-        <button class="fab-btn" onclick="toggleTheme()" title="Toggle Theme"><i id="theme-icon" class="ph ph-moon"></i></button>
-        <button class="fab-btn" onclick="openSettings()" title="Settings"><i class="ph ph-gear"></i></button>
+        <button class="fab-btn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"><i id="theme-icon" class="ph ph-moon"></i></button>
+        <button class="fab-btn" onclick="openSettings()" title="Settings" aria-label="Open Settings"><i class="ph ph-gear"></i></button>
     </div>
 
     <div class="modal-overlay" id="settings-modal" onclick="closeSettingsOverlay(event)">
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="ph ph-sliders"></i> Settings</h2>
-                <button class="modal-close" onclick="closeSettings()"><i class="ph ph-x"></i></button>
+                <button class="modal-close" onclick="closeSettings()" aria-label="Close Settings"><i class="ph ph-x"></i></button>
             </div>
-            
+
             <div class="form-group">
                 <label>Your Name</label>
                 <input type="text" id="set-name" class="form-control" placeholder="e.g. Steve">
@@ -46,7 +46,7 @@
 
             <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
                 <label><i class="ph-fill ph-paint-brush" style="margin-right: 5px;"></i> Visual Themes</label>
-                
+
                 <div style="margin-bottom: 15px;">
                     <span class="toggle-label" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">Theme Engine</span>
                     <select id="set-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;">
@@ -95,7 +95,7 @@
 
             <div class="form-group" style="margin-top: 20px;">
                 <label>Weather Location Override</label>
-                <input type="text" id="set-weather" class="form-control" placeholder="Leave blank to use auto-IP...">
+                <input type="text" id="set-weather" class="form-control" placeholder="Leave blank to use auto-IP..." aria-label="Weather Location Override">
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
@@ -132,14 +132,14 @@
 
         <div class="card span-3 search-card" id="mod-search">
             <i class="ph ph-magnifying-glass search-icon"></i>
-            <select id="search-engine" class="engine-select">
+            <select id="search-engine" class="engine-select" aria-label="Search Engine">
                 <option value="google">Google</option>
                 <option value="duckduckgo">DuckDuckGo</option>
                 <option value="bing">Bing</option>
             </select>
-            <input type="text" id="universal-search" class="search-input" placeholder="Search the web... (Press Alt+S)" onkeypress="executeSearch(event)">
+            <input type="text" id="universal-search" class="search-input" placeholder="Search the web... (Press Alt+S)" onkeypress="executeSearch(event)" aria-label="Search query">
         </div>
-        
+
         <div class="card" id="mod-time">
             <div class="time-drag-wrap">
                 <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
@@ -175,7 +175,7 @@
                 </div>
                 <button class="btn-clean" onclick="clearCompletedTodos()">Clear Done</button>
             </div>
-            
+
             <div class="news-tabs" style="margin-bottom: 15px;">
                 <div class="news-tab active" id="task-tab-work" onclick="switchTaskTab('work')">Work</div>
                 <div class="news-tab" id="task-tab-personal" onclick="switchTaskTab('personal')">Personal</div>
@@ -183,8 +183,8 @@
             </div>
 
             <div class="todo-input-group">
-                <input type="text" id="todo-input" placeholder="Add a task... (Press Alt+T)" onkeypress="handleTodoKeyPress(event)">
-                <button class="btn-add" onclick="addTodo()">+</button>
+                <input type="text" id="todo-input" placeholder="Add a task... (Press Alt+T)" onkeypress="handleTodoKeyPress(event)" aria-label="New task description">
+                <button class="btn-add" onclick="addTodo()" aria-label="Add Task" title="Add Task">+</button>
             </div>
             <ul id="todo-list" class="todo-list"></ul>
         </div>
@@ -195,9 +195,9 @@
                     <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
                     <h2><i class="ph-fill ph-crosshair" style="margin-right: 8px;"></i>Torn Status</h2>
                 </div>
-                <button class="icon-btn" onclick="toggleTornConfig()" title="Configure API Key"><i class="ph ph-gear"></i></button>
+                <button class="icon-btn" onclick="toggleTornConfig()" title="Configure API Key" aria-label="Configure Torn API Key"><i class="ph ph-gear"></i></button>
             </div>
-            
+
             <div id="torn-display-view" class="torn-display">
                 <div class="torn-profile">
                     <div class="torn-name" id="torn-profile-name">Connecting...</div>
@@ -256,9 +256,9 @@
                     <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
                     <h2><i class="ph-fill ph-briefcase" style="margin-right: 8px;"></i>Bank Tools</h2>
                 </div>
-                <button class="icon-btn" onclick="toggleBankAppInputs()" title="Add Local App"><i class="ph ph-plus"></i></button>
+                <button class="icon-btn" onclick="toggleBankAppInputs()" title="Add Local App" aria-label="Add Local App"><i class="ph ph-plus"></i></button>
             </div>
-            
+
             <div id="bank-app-inputs-container" class="shortcuts-inputs" style="display: none;">
                 <input type="text" id="ba-name" class="shortcut-input" placeholder="App Name (e.g. Calculators)">
                 <input type="text" id="ba-icon" class="shortcut-input" placeholder="Icon Class (e.g. ph-calculator)">
@@ -304,7 +304,7 @@
                 <button class="calendar-nav-btn" onclick="changeMonth(1)" title="Next Month">&#9654;</button>
             </div>
             <div id="mini-calendar"></div>
-            
+
             <div class="collapsible-header" onclick="toggleSection('holiday-list', 'holiday-chevron', 'holidayState')" title="Toggle Holidays">
                 <h3 style="font-size: 0.8rem; margin: 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Upcoming Holidays</h3>
                 <i id="holiday-chevron" class="ph ph-caret-down chevron"></i>
@@ -318,9 +318,9 @@
                     <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
                     <h2><i class="ph ph-link" style="margin-right: 8px;"></i>Quick Links</h2>
                 </div>
-                <button class="icon-btn" onclick="toggleShortcutInputs()" title="Add New Link"><i class="ph ph-plus"></i></button>
+                <button class="icon-btn" onclick="toggleShortcutInputs()" title="Add New Link" aria-label="Add New Link"><i class="ph ph-plus"></i></button>
             </div>
-            
+
             <div id="shortcut-inputs-container" class="shortcuts-inputs" style="display: none;">
                 <input type="text" id="sc-name" class="shortcut-input" placeholder="Site Name (e.g. Reddit)">
                 <input type="text" id="sc-path" class="shortcut-input" placeholder="URL (e.g. reddit.com)" onkeypress="handleShortcutKeyPress(event)">
@@ -329,7 +329,7 @@
                     <button class="btn-clean" style="flex: 1;" onclick="toggleShortcutInputs()">Cancel</button>
                 </div>
             </div>
-            
+
             <div id="shortcuts-grid" class="shortcuts-grid"></div>
         </div>
 
@@ -340,7 +340,7 @@
                     <h2 id="notepad-header-title"><i class="ph ph-notepad" style="margin-right: 8px;"></i>Quick Notes</h2>
                 </div>
                 <div id="notepad-list-actions">
-                    <button class="icon-btn" onclick="createNewNote()" title="Create New Note (Alt+N)"><i class="ph ph-plus"></i></button>
+                    <button class="icon-btn" onclick="createNewNote()" title="Create New Note (Alt+N)" aria-label="Create New Note"><i class="ph ph-plus"></i></button>
                 </div>
                 <div id="notepad-edit-actions" class="action-group" style="display: none;">
                     <button class="action-btn" onclick="copyNote()"><i class="ph ph-copy"></i> Copy</button>
@@ -349,7 +349,7 @@
                 </div>
             </div>
             <div id="notepad-list-view" class="notepad-list-container">
-                <input type="text" id="note-search" class="note-search-input" placeholder="Search notes..." oninput="renderNotesList()">
+                <input type="text" id="note-search" class="note-search-input" placeholder="Search notes..." oninput="renderNotesList()" aria-label="Search notes">
                 <div id="notes-list-inject"></div>
             </div>
             <div id="notepad-edit-view" style="display: none; flex-direction: column; flex-grow: 1;">
@@ -364,7 +364,7 @@
                         <span class="color-dot bg-red" id="c-red" onclick="setNoteColor('red')" title="Red"></span>
                     </div>
                 </div>
-                
+
                 <div class="editor-container">
                     <textarea id="notepad-input" placeholder="Write your note here...&#10;Auto-saves instantly."></textarea>
                 </div>
@@ -382,9 +382,9 @@
                     <div class="drag-handle" title="Hover to drag"><i class="ph ph-dots-six-vertical"></i></div>
                     <h2><i class="ph ph-newspaper" style="margin-right: 8px;"></i>News Hub</h2>
                 </div>
-                <button id="news-refresh-btn" class="icon-btn" onclick="refreshCurrentNews()" title="Force Refresh News"><i class="ph ph-arrows-clockwise"></i></button>
+                <button id="news-refresh-btn" class="icon-btn" onclick="refreshCurrentNews()" title="Force Refresh News" aria-label="Refresh News"><i class="ph ph-arrows-clockwise"></i></button>
             </div>
-            
+
             <div class="news-tabs">
                 <div class="news-tab active" id="tab-dailystar" onclick="fetchNews('dailystar')">The Daily Star</div>
                 <div class="news-tab" id="tab-prothomalo" onclick="fetchNews('prothomalo')">Prothom Alo</div>
