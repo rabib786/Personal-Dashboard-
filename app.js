@@ -1,21 +1,21 @@
 // --- GLOBAL KEYBOARD SHORTCUTS ---
 document.addEventListener('keydown', (e) => {
     // Alt + S = Search
-    if (e.altKey && e.key.toLowerCase() === 's') { 
-        e.preventDefault(); 
+    if (e.altKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
         const sb = document.getElementById('universal-search');
-        if(sb) sb.focus(); 
+        if(sb) sb.focus();
     }
     // Alt + T = Add Task
-    if (e.altKey && e.key.toLowerCase() === 't') { 
-        e.preventDefault(); 
+    if (e.altKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
         const ti = document.getElementById('todo-input');
-        if(ti) ti.focus(); 
+        if(ti) ti.focus();
     }
     // Alt + N = New Note
-    if (e.altKey && e.key.toLowerCase() === 'n') { 
-        e.preventDefault(); 
-        createNewNote(); 
+    if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        createNewNote();
     }
 });
 
@@ -25,12 +25,12 @@ function executeSearch(e) {
         const query = document.getElementById('universal-search').value;
         const engine = document.getElementById('search-engine').value;
         if (!query.trim()) return;
-        
+
         let url = '';
         if (engine === 'google') url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
         else if (engine === 'duckduckgo') url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
         else if (engine === 'bing') url = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
-        
+
         window.open(url, '_blank');
         document.getElementById('universal-search').value = '';
     }
@@ -43,12 +43,12 @@ let rawSettings = JSON.parse(localStorage.getItem('dashSettings')) || {};
 
 // Merged Settings state
 let dashSettings = {
-    name: rawSettings.name || '', 
-    clock24: rawSettings.clock24 || false, 
-    weatherCity: rawSettings.weatherCity || '', 
-    bgType: rawSettings.bgType || 'animated', 
-    bgValue: rawSettings.bgValue || '', 
-    customRssName: rawSettings.customRssName || '', 
+    name: rawSettings.name || '',
+    clock24: rawSettings.clock24 || false,
+    weatherCity: rawSettings.weatherCity || '',
+    bgType: rawSettings.bgType || 'animated',
+    bgValue: rawSettings.bgValue || '',
+    customRssName: rawSettings.customRssName || '',
     customRssUrl: rawSettings.customRssUrl || '',
     compactMode: rawSettings.compactMode || false,
     visibility: rawSettings.visibility || defaultVis,
@@ -80,15 +80,15 @@ function updateThemeIcon(theme) {
 }
 
 function applyBackground() {
-    // If a theme explicitly overrides the background in CSS (Terminal/Pixel/Cyberpunk), 
-    // setting inline background to '' lets the CSS take over. 
+    // If a theme explicitly overrides the background in CSS (Terminal/Pixel/Cyberpunk),
+    // setting inline background to '' lets the CSS take over.
     // If user explicitly chose 'solid' or 'image', we override the theme's background.
     if(dashSettings.bgType === 'solid') {
         document.body.style.background = dashSettings.bgValue || (document.documentElement.getAttribute('data-theme')==='dark' ? '#141e30' : '#fdfbfb');
     } else if(dashSettings.bgType === 'image') {
         document.body.style.background = `url('${dashSettings.bgValue}') center/cover no-repeat fixed`;
     } else {
-        document.body.style.background = ''; 
+        document.body.style.background = '';
     }
 }
 
@@ -106,7 +106,7 @@ function adjustColorHover(color, amount) {
 
 function applyVisuals() {
     const root = document.documentElement;
-    
+
     // Inject Theme Style Class
     root.setAttribute('data-theme-style', dashSettings.themeStyle);
 
@@ -119,7 +119,7 @@ function applyVisuals() {
 
 function applyLayoutVisibility() {
     const map = { search: 'mod-search', time: 'mod-time', tasks: 'mod-tasks', torn: 'mod-torn', bank: 'mod-bank-apps', weather: 'mod-weather', calendar: 'mod-calendar', shortcuts: 'mod-shortcuts', notepad: 'mod-notepad', news: 'mod-news' };
-    
+
     for (let key in map) {
         const el = document.getElementById(map[key]);
         if (el) {
@@ -130,7 +130,7 @@ function applyLayoutVisibility() {
             }
         }
     }
-    
+
     if (dashSettings.compactMode) document.body.classList.add('compact-mode');
     else document.body.classList.remove('compact-mode');
 }
@@ -154,7 +154,7 @@ function openSettings() {
     document.getElementById('set-weather').value = dashSettings.weatherCity;
     document.getElementById('set-rss-name').value = dashSettings.customRssName || '';
     document.getElementById('set-rss-url').value = dashSettings.customRssUrl || '';
-    
+
     // Visuals
     document.getElementById('set-theme').value = dashSettings.themeStyle || 'glass';
     document.getElementById('set-accent').value = dashSettings.accentColor || '#0066cc';
@@ -163,7 +163,7 @@ function openSettings() {
     document.getElementById('set-compact').checked = dashSettings.compactMode;
     Object.keys(defaultVis).forEach(k => {
         const chk = document.getElementById(`vis-${k}`);
-        if(chk) chk.checked = dashSettings.visibility[k] !== false; 
+        if(chk) chk.checked = dashSettings.visibility[k] !== false;
     });
 
     selectBgType(dashSettings.bgType);
@@ -189,7 +189,7 @@ function saveSettings() {
     dashSettings.clock24 = document.getElementById('set-clock24').checked;
     dashSettings.customRssName = document.getElementById('set-rss-name').value.trim();
     dashSettings.customRssUrl = document.getElementById('set-rss-url').value.trim();
-    
+
     // Visuals
     dashSettings.themeStyle = document.getElementById('set-theme').value;
     dashSettings.accentColor = document.getElementById('set-accent').value;
@@ -204,20 +204,20 @@ function saveSettings() {
     const oldCity = dashSettings.weatherCity;
     dashSettings.weatherCity = document.getElementById('set-weather').value.trim();
     dashSettings.bgValue = document.getElementById('set-bg-val').value.trim();
-    
+
     localStorage.setItem('dashSettings', JSON.stringify(dashSettings));
     applyBackground();
     applyVisuals();
     applyLayoutVisibility();
-    initCustomRssTab(); 
+    initCustomRssTab();
     closeSettings();
-    startClock(); 
-    triggerMasonryUpdate(); 
-    
+    startClock();
+    triggerMasonryUpdate();
+
     if(oldCity !== dashSettings.weatherCity) {
         const wc = document.getElementById('weather-container');
         if(wc) wc.innerHTML = '<div class="loading">Tracking atmospheric data...</div>';
-        fetchWeatherForCity(); 
+        fetchWeatherForCity();
     }
 }
 
@@ -265,8 +265,8 @@ function importData(event) {
 // --- SUB-ITEM DRAG & DROP ENGINE ---
 let dragSrcEl = null; let dragType = null;
 function handleSubDragStart(e, type) {
-    e.stopPropagation(); 
-    dragSrcEl = e.target.closest('li, .shortcut-item, .bank-app-wrapper'); 
+    e.stopPropagation();
+    dragSrcEl = e.target.closest('li, .shortcut-item, .bank-app-wrapper');
     dragType = type;
     dragSrcEl.classList.add('dragging-item');
     e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/html', dragSrcEl.innerHTML);
@@ -293,7 +293,7 @@ function triggerMasonryUpdate() {
     setTimeout(() => {
         document.querySelectorAll('.card').forEach(card => {
             if(window.getComputedStyle(card).display === 'none') return;
-            
+
             if(card.id === 'mod-search') {
                 card.style.gridRowEnd = `span ${Math.ceil(card.getBoundingClientRect().height) + 20}`;
                 return;
@@ -306,7 +306,7 @@ function triggerMasonryUpdate() {
 function toggleSection(contentId, chevronId, storageKey) {
     const content = document.getElementById(contentId); const chevron = document.getElementById(chevronId);
     if (!content) return;
-    if (content.style.display === 'none') { content.style.display = contentId === 'weather-details-view' ? 'flex' : 'block'; chevron.classList.add('open'); localStorage.setItem(storageKey, 'open'); } 
+    if (content.style.display === 'none') { content.style.display = contentId === 'weather-details-view' ? 'flex' : 'block'; chevron.classList.add('open'); localStorage.setItem(storageKey, 'open'); }
     else { content.style.display = 'none'; chevron.classList.remove('open'); localStorage.setItem(storageKey, 'closed'); }
     triggerMasonryUpdate();
 }
@@ -316,24 +316,24 @@ function initDragAndDrop() {
     const dashboard = document.getElementById('dashboard-grid');
     let draggedItem = null;
     const savedOrder = JSON.parse(localStorage.getItem('dashboardLayout'));
-    
+
     const searchEl = document.getElementById('mod-search');
-    
+
     if (savedOrder && savedOrder.length > 0) {
         if(searchEl) dashboard.appendChild(searchEl); // Lock search to top
         savedOrder.forEach(id => { const el = document.getElementById(id); if (el && id !== 'mod-search') dashboard.appendChild(el); });
         document.querySelectorAll('.card').forEach(c => { if(!savedOrder.includes(c.id) && c.id !== 'mod-search') dashboard.appendChild(c); });
     }
-    
+
     document.querySelectorAll('.card').forEach(card => {
         const handle = card.querySelector('.drag-handle');
         if (handle) {
             handle.addEventListener('mouseenter', () => card.setAttribute('draggable', 'true'));
             handle.addEventListener('mouseleave', () => card.setAttribute('draggable', 'false'));
         }
-        card.addEventListener('dragstart', function(e) { 
-            if (e.target !== this) return; 
-            draggedItem = this; setTimeout(() => this.classList.add('dragging'), 0); 
+        card.addEventListener('dragstart', function(e) {
+            if (e.target !== this) return;
+            draggedItem = this; setTimeout(() => this.classList.add('dragging'), 0);
         });
         card.addEventListener('dragend', function() {
             this.classList.remove('dragging'); this.setAttribute('draggable', 'false'); draggedItem = null;
@@ -342,9 +342,9 @@ function initDragAndDrop() {
             triggerMasonryUpdate();
         });
     });
-    
+
     dashboard.addEventListener('dragover', e => {
-        e.preventDefault(); 
+        e.preventDefault();
         if (!draggedItem || draggedItem.classList.contains('todo-item') || draggedItem.classList.contains('shortcut-item') || draggedItem.classList.contains('bank-app-wrapper')) return;
         const target = e.target.closest('.card');
         if (target && target !== draggedItem && !target.classList.contains('dragging') && target.id !== 'mod-search') {
@@ -358,7 +358,7 @@ function initDragAndDrop() {
 // --- 1. CLOCK ---
 function startClock() {
     let hijriFormatter = null;
-    try { hijriFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }); } 
+    try { hijriFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }); }
     catch(e) { const hw = document.getElementById('hijri-wrapper'); if(hw) hw.style.display = 'none'; }
 
     function updateTime() {
@@ -366,24 +366,24 @@ function startClock() {
         let greeting = "Good Evening"; let iconClass = "ph-moon-stars";
         if (hour >= 5 && hour < 12) { greeting = "Good Morning"; iconClass = "ph-sun-horizon"; }
         else if (hour >= 12 && hour < 17) { greeting = "Good Afternoon"; iconClass = "ph-sun"; }
-        
+
         document.getElementById('greeting').innerText = dashSettings.name ? `${greeting}, ${dashSettings.name}` : greeting;
         document.getElementById('clock-icon').className = `ph-fill ${iconClass} clock-greeting-icon`;
 
         let hrShow = hour; let ampm = "";
         if(!dashSettings.clock24) { hrShow = hour % 12; if(hrShow === 0) hrShow = 12; ampm = hour >= 12 ? 'PM' : 'AM'; }
-        
+
         document.getElementById('time-hr').innerText = hrShow < 10 && dashSettings.clock24 ? '0'+hrShow : hrShow;
         document.getElementById('time-min').innerText = min < 10 ? '0' + min : min;
         document.getElementById('time-ampm').innerText = ampm;
         document.getElementById('date-main').innerHTML = `<i class="ph ph-calendar-blank"></i> ` + now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-        
-        if (hijriFormatter) { 
-            try { 
+
+        if (hijriFormatter) {
+            try {
                 let hDate = hijriFormatter.format(now);
                 if(!hDate.includes('AH')) hDate += " AH";
-                document.getElementById('hijri-main').innerText = hDate; 
-            } catch(e){} 
+                document.getElementById('hijri-main').innerText = hDate;
+            } catch(e){}
         }
 
         const start = new Date(now.getFullYear(), 0, 0);
@@ -393,14 +393,14 @@ function startClock() {
         document.getElementById('week-display').innerText = `Week ${weekOfYear} | Day ${dayOfYear}`;
         document.getElementById('day-progress').style.width = `${((hour * 3600 + min * 60 + now.getSeconds()) / 86400) * 100}%`;
     }
-    updateTime(); setInterval(updateTime, 1000); 
+    updateTime(); setInterval(updateTime, 1000);
 }
 
 // --- INIT APP ---
 function initDashboard() {
     initTheme();
-    applyLayoutVisibility(); 
-    
+    applyLayoutVisibility();
+
     if (localStorage.getItem('holidayState') === 'open') { document.getElementById('holiday-list').style.display = 'block'; document.getElementById('holiday-chevron').classList.add('open'); }
     initCustomRssTab();
     triggerMasonryUpdate(); startClock(); fetchWeatherForCity(); initTornTracker();
@@ -420,18 +420,18 @@ function saveBankApps() { localStorage.setItem('dashboardBankApps', JSON.stringi
 
 function toggleBankAppInputs() {
     const container = document.getElementById('bank-app-inputs-container');
-    if (container.style.display === 'none') { container.style.display = 'flex'; document.getElementById('ba-name').focus(); } 
+    if (container.style.display === 'none') { container.style.display = 'flex'; document.getElementById('ba-name').focus(); }
     else { container.style.display = 'none'; }
     triggerMasonryUpdate();
 }
 
 function renderBankApps() {
-    const grid = document.getElementById('bank-apps-grid'); 
+    const grid = document.getElementById('bank-apps-grid');
     if(!grid) return;
     grid.innerHTML = '';
-    
+
     if (bankAppsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px; grid-column: span 2;">No tools added.</div>'; triggerMasonryUpdate(); return; }
-    
+
     let html = '';
     bankAppsArr.forEach((app, i) => {
         html += `
@@ -451,34 +451,34 @@ function addBankApp() {
     const n = document.getElementById('ba-name'), ic = document.getElementById('ba-icon'), p = document.getElementById('ba-path');
     if (n.value.trim() && p.value.trim()) {
         let iconClass = ic.value.trim() || 'ph-app-window';
-        bankAppsArr.push({ name: n.value.trim(), icon: iconClass, path: p.value.trim() }); 
-        saveBankApps(); renderBankApps(); 
-        n.value = ''; ic.value = ''; p.value = ''; toggleBankAppInputs(); 
+        bankAppsArr.push({ name: n.value.trim(), icon: iconClass, path: p.value.trim() });
+        saveBankApps(); renderBankApps();
+        n.value = ''; ic.value = ''; p.value = ''; toggleBankAppInputs();
     }
 }
 function handleBankAppKeyPress(e) { if (e.key === 'Enter') addBankApp(); }
-function deleteBankApp(i, event) { 
-    event.preventDefault(); event.stopPropagation(); 
-    if(confirm("Remove this tool from the dashboard?")) { 
-        bankAppsArr.splice(i, 1); saveBankApps(); renderBankApps(); 
-    } 
+function deleteBankApp(i, event) {
+    event.preventDefault(); event.stopPropagation();
+    if(confirm("Remove this tool from the dashboard?")) {
+        bankAppsArr.splice(i, 1); saveBankApps(); renderBankApps();
+    }
 }
 
 
 // --- 3. TORN CITY TRACKER MODULE ---
 let tornConfig = JSON.parse(localStorage.getItem('dashboardTornTracker')) || { key: '' };
 let tornInterval;
-let tornTimers = {}; 
+let tornTimers = {};
 let tornTickInterval;
 
 function initTornTracker() {
     if(tornConfig.key) {
         fetchTornData();
         if(tornInterval) clearInterval(tornInterval);
-        tornInterval = setInterval(fetchTornData, 60000); 
-        
+        tornInterval = setInterval(fetchTornData, 60000);
+
         if(tornTickInterval) clearInterval(tornTickInterval);
-        tornTickInterval = setInterval(updateTornTimersUI, 1000); 
+        tornTickInterval = setInterval(updateTornTimersUI, 1000);
     } else {
         resetTornUI();
     }
@@ -487,7 +487,7 @@ function initTornTracker() {
 function toggleTornConfig() {
     const configView = document.getElementById('torn-config-view');
     const displayView = document.getElementById('torn-display-view');
-    
+
     if (configView.style.display === 'none') {
         document.getElementById('torn-cfg-key').value = tornConfig.key;
         configView.style.display = 'flex';
@@ -530,12 +530,12 @@ function resetTornUI() {
 
 async function fetchTornData() {
     if(!tornConfig.key) return;
-    
+
     try {
         const response = await fetch(`https://api.torn.com/user/?selections=bars,profile,cooldowns,money&key=${tornConfig.key}`);
         if(!response.ok) throw new Error("Fetch failed");
         const data = await response.json();
-        
+
         if(data.error) {
             console.error("Torn API Error:", data.error.error);
             const pn = document.getElementById('torn-profile-name');
@@ -546,10 +546,10 @@ async function fetchTornData() {
         // Profile & Status
         const pn = document.getElementById('torn-profile-name');
         if(pn) pn.innerText = `${data.name} [${data.level}]`;
-        let cleanStatus = data.status.description.replace(/<[^>]*>?/gm, ''); 
+        let cleanStatus = data.status.description.replace(/<[^>]*>?/gm, '');
         const ps = document.getElementById('torn-profile-status');
         if(ps) ps.innerText = cleanStatus;
-        
+
         // Money
         const tcash = document.getElementById('torn-cash');
         if(tcash) tcash.innerText = '$' + data.money_onhand.toLocaleString('en-US');
@@ -574,7 +574,7 @@ async function fetchTornData() {
 
         updateTornTimersUI();
         triggerMasonryUpdate();
-        
+
     } catch (e) {
         console.error("Failed to fetch Torn data", e);
     }
@@ -585,7 +585,7 @@ function updateTornBar(prefix, barData) {
     const cur = barData.current;
     const max = barData.maximum;
     const pct = Math.min(100, Math.max(0, (cur / max) * 100));
-    
+
     const ve = document.getElementById(`torn-${prefix}-val`);
     const be = document.getElementById(`torn-${prefix}-bar`);
     if(ve) ve.innerText = `${cur} / ${max}`;
@@ -593,7 +593,7 @@ function updateTornBar(prefix, barData) {
 }
 
 function updateTornTimersUI() {
-    if(!tornTimers.enFull) return; 
+    if(!tornTimers.enFull) return;
 
     const now = Date.now();
 
@@ -621,7 +621,7 @@ function updateTornTimersUI() {
         let m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
         let sec = (s % 60).toString().padStart(2, '0');
         el.innerText = `${h}:${m}:${sec}`;
-        el.style.color = 'var(--danger)'; 
+        el.style.color = 'var(--danger)';
     };
 
     const en = document.getElementById('torn-en-full'); if(en) en.innerText = fmtFull(tornTimers.enFull);
@@ -661,30 +661,30 @@ function renderTodos() {
     const currentList = todos[activeTaskTab] || [];
     const tc = document.getElementById('task-count');
     if(tc) tc.innerText = `(${currentList.filter(t => !t.completed).length})`;
-    const list = document.getElementById('todo-list'); 
+    const list = document.getElementById('todo-list');
     if(!list) return;
     list.innerHTML = currentList.length === 0 ? '<li style="text-align:center; color:var(--text-muted); padding: 30px 0; font-weight: 500;">All caught up!</li>' : '';
-    
+
     let html = list.innerHTML;
-    currentList.forEach((t, i) => { 
+    currentList.forEach((t, i) => {
         html += `
         <li class="todo-item ${t.completed ? 'completed' : ''}" draggable="true" ondragstart="handleSubDragStart(event, 'task')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'task', todos['${activeTaskTab}'], saveTodos, renderTodos)" ondragend="handleSubDragEnd(event)">
             <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
             <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${i})">
             <span class="todo-text" onclick="toggleTodo(${i})">${escapeHtml(t.text)}</span>
             <button class="delete-btn" onclick="deleteTodo(${i})" title="Delete task">&times;</button>
-        </li>`; 
+        </li>`;
     });
     list.innerHTML = html;
     triggerMasonryUpdate();
 }
-function addTodo() { 
-    const i = document.getElementById('todo-input'); 
-    if (i && i.value.trim()) { 
-        todos[activeTaskTab].push({ text: i.value.trim(), completed: false }); 
-        i.value = ''; 
-        saveTodos(); renderTodos(); 
-    } 
+function addTodo() {
+    const i = document.getElementById('todo-input');
+    if (i && i.value.trim()) {
+        todos[activeTaskTab].push({ text: i.value.trim(), completed: false });
+        i.value = '';
+        saveTodos(); renderTodos();
+    }
 }
 function handleTodoKeyPress(e) { if (e.key === 'Enter') addTodo(); }
 function toggleTodo(i) { todos[activeTaskTab][i].completed = !todos[activeTaskTab][i].completed; saveTodos(); renderTodos(); }
@@ -756,7 +756,7 @@ async function fetchWeather(lat, lon, locName) {
     const wState = localStorage.getItem('weatherCardState') || 'closed';
     const detailsDisplay = wState === 'open' ? 'flex' : 'none';
     if (document.getElementById('weather-card-chevron') && wState === 'open') document.getElementById('weather-card-chevron').classList.add('open');
-    
+
     try {
         const [wRes, aRes] = await Promise.all([
             fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,visibility&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto`),
@@ -789,7 +789,7 @@ async function fetchWeather(lat, lon, locName) {
                     <span><i class="ph-fill ph-sunrise" style="color: #fbbc04; font-size: 1.1rem;"></i> <span style="color:var(--text-main)">${new Date(day.sunrise[0]).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</span></span>
                     <span><i class="ph-fill ph-sunset" style="color: #ff9500; font-size: 1.1rem;"></i> <span style="color:var(--text-main)">${new Date(day.sunset[0]).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</span></span>
                 </div>`;
-        let hIdx = hr.time.findIndex(t => t >= new Date().toISOString().slice(0, 14)+"00"); if(hIdx === -1) hIdx = 0; 
+        let hIdx = hr.time.findIndex(t => t >= new Date().toISOString().slice(0, 14)+"00"); if(hIdx === -1) hIdx = 0;
         html += `<div style="width: 100%;"><div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin: 0 0 8px 0; color: var(--text-muted);">Hourly</div><div class="hourly-forecast">`;
         for(let i=hIdx+1; i<=hIdx+6; i++) {
             if(!hr.time[i]) break;
@@ -855,7 +855,7 @@ function loadBDHolidays(year) {
             { date: "2026-12-31", name: "Bank Holiday" }
         ];
     }
-    
+
     holidaysData = bdHolidays.sort((a, b) => new Date(a.date) - new Date(b.date));
     renderCalendar(); renderHolidayList();
 }
@@ -878,7 +878,7 @@ function renderCalendar() {
 }
 
 function renderHolidayList() {
-    const list = document.getElementById('holiday-list'); 
+    const list = document.getElementById('holiday-list');
     if(!list) return;
     const now = new Date(); now.setHours(0,0,0,0);
     const up = holidaysData.filter(h => new Date(h.date) >= now);
@@ -897,14 +897,14 @@ function escapeHtml(u) { return (u || '').replace(/[&<"'>]/g, m => ({ '&': '&amp
 let shortcutsArr = JSON.parse(localStorage.getItem('dashboardBookmarks')) || [];
 function toggleShortcutInputs() {
     const container = document.getElementById('shortcut-inputs-container');
-    if (container.style.display === 'none') { container.style.display = 'flex'; document.getElementById('sc-name').focus(); } 
+    if (container.style.display === 'none') { container.style.display = 'flex'; document.getElementById('sc-name').focus(); }
     else { container.style.display = 'none'; }
     triggerMasonryUpdate();
 }
 function initShortcutsEngine() { renderShortcuts(); }
 function saveShortcuts() { localStorage.setItem('dashboardBookmarks', JSON.stringify(shortcutsArr)); }
 function renderShortcuts() {
-    const grid = document.getElementById('shortcuts-grid'); 
+    const grid = document.getElementById('shortcuts-grid');
     if(!grid) return;
 
     if (shortcutsArr.length === 0) { grid.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 20px;">No links added yet.</div>'; triggerMasonryUpdate(); return; }
@@ -931,7 +931,7 @@ function addShortcut() {
     const n = document.getElementById('sc-name'), p = document.getElementById('sc-path');
     if (n.value.trim() && p.value.trim()) {
         let url = p.value.trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-        shortcutsArr.push({ name: n.value.trim(), path: url }); saveShortcuts(); renderShortcuts(); n.value = ''; p.value = ''; toggleShortcutInputs(); 
+        shortcutsArr.push({ name: n.value.trim(), path: url }); saveShortcuts(); renderShortcuts(); n.value = ''; p.value = ''; toggleShortcutInputs();
     }
 }
 function handleShortcutKeyPress(e) { if (e.key === 'Enter') addShortcut(); }
@@ -941,9 +941,9 @@ function deleteShortcut(i, event) { event.preventDefault(); event.stopPropagatio
 let notesArr = []; let currentNoteId = null;
 function initNotesEngine() {
     let savedNotes = JSON.parse(localStorage.getItem('dashboardNotes'));
-    if (!savedNotes) { notesArr = [{ id: Date.now(), title: 'Welcome', content: 'Type your quick notes here.', lastEdited: Date.now(), color: 'none', pinned: false }]; saveNotesArr(); } 
+    if (!savedNotes) { notesArr = [{ id: Date.now(), title: 'Welcome', content: 'Type your quick notes here.', lastEdited: Date.now(), color: 'none', pinned: false }]; saveNotesArr(); }
     else { notesArr = savedNotes.map(n => ({...n, color: n.color || 'none', pinned: n.pinned || false})); }
-    
+
     const titleInp = document.getElementById('note-title-input');
     const textarea = document.getElementById('notepad-input');
     if(titleInp) titleInp.addEventListener('input', autoSaveNote);
@@ -958,10 +958,10 @@ function initNotesEngine() {
 function saveNotesArr() { localStorage.setItem('dashboardNotes', JSON.stringify(notesArr)); }
 
 function renderNotesList() {
-    const list = document.getElementById('notes-list-inject'); 
+    const list = document.getElementById('notes-list-inject');
     const searchEl = document.getElementById('note-search');
     if(!list || !searchEl) return;
-    
+
     const searchQ = searchEl.value.toLowerCase();
     let filteredNotes = searchQ ? notesArr.filter(n => n.title.toLowerCase().includes(searchQ) || n.content.toLowerCase().includes(searchQ)) : notesArr;
     if (filteredNotes.length === 0) { list.innerHTML = `<div class="loading">${searchQ ? 'No matches found.' : 'No notes yet. Click + to create.'}</div>`; triggerMasonryUpdate(); return; }
@@ -971,7 +971,7 @@ function renderNotesList() {
         const diffMins = Math.floor((Date.now() - note.lastEdited) / 60000);
         let dateStr = diffMins < 1 ? "Just now" : diffMins < 60 ? `${diffMins}m` : diffMins < 1440 ? `${Math.floor(diffMins/60)}h` : new Date(note.lastEdited).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         const pinClass = note.pinned ? 'pinned' : ''; const pinIcon = note.pinned ? 'ph-fill ph-push-pin' : 'ph ph-push-pin';
-        
+
         html += `
             <div class="note-item color-${note.color} ${pinClass}" onclick="openNote(${note.id})">
                 <div class="note-item-content">
@@ -1011,10 +1011,10 @@ function closeNote() {
 }
 function autoSaveNote() {
     if (!currentNoteId) return; const idx = notesArr.findIndex(n => n.id === currentNoteId);
-    if (idx > -1) { 
-        notesArr[idx].title = document.getElementById('note-title-input').value; 
-        notesArr[idx].content = document.getElementById('notepad-input').value; 
-        notesArr[idx].lastEdited = Date.now(); saveNotesArr(); 
+    if (idx > -1) {
+        notesArr[idx].title = document.getElementById('note-title-input').value;
+        notesArr[idx].content = document.getElementById('notepad-input').value;
+        notesArr[idx].lastEdited = Date.now(); saveNotesArr();
         const status = document.getElementById('note-save-status'); status.innerHTML = '<i class="ph ph-spinner" style="animation: spin 1s linear infinite; margin-right:3px;"></i>Saving';
         clearTimeout(window.saveTimeout); window.saveTimeout = setTimeout(() => { status.innerHTML = '<i class="ph ph-cloud-check" style="margin-right:3px;"></i>Saved'; }, 500);
     }
@@ -1028,7 +1028,7 @@ function deleteNote(id, event) { event.stopPropagation(); if(confirm("Delete thi
 function updateCharCount() { const inc = document.getElementById('note-char-count'); if(inc) inc.innerText = `${document.getElementById('notepad-input').value.length} chars`; }
 function copyNote() {
     const content = document.getElementById('notepad-input').value;
-    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(content).then(showCopied); } 
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(content).then(showCopied); }
     else { const ta = document.createElement("textarea"); ta.value = content; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); showCopied(); } catch (err) {} document.body.removeChild(ta); }
     function showCopied() { const t = document.getElementById('notepad-header-title'); t.innerHTML = '<i class="ph ph-check-circle" style="margin-right: 8px; color: var(--success);"></i>Copied!'; setTimeout(() => t.innerHTML = '<i class="ph ph-notepad" style="margin-right: 8px;"></i>Edit Note', 1500); }
 }
@@ -1050,19 +1050,19 @@ const fetchWithTimeout = (url, ms) => Promise.race([ fetch(url), new Promise((_,
 
 async function fetchNewsData(category, forceRefresh) {
     let items = [];
-    const feeds = { 
-        'dailystar': 'https://www.thedailystar.net/frontpage/rss.xml', 
-        'prothomalo': 'https://en.prothomalo.com/feed/', 
-        'business': 'https://www.thedailystar.net/business/rss.xml', 
-        'sports': 'https://www.thedailystar.net/sports/rss.xml', 
+    const feeds = {
+        'dailystar': 'https://www.thedailystar.net/frontpage/rss.xml',
+        'prothomalo': 'https://en.prothomalo.com/feed/',
+        'business': 'https://www.thedailystar.net/business/rss.xml',
+        'sports': 'https://www.thedailystar.net/sports/rss.xml',
         'global': 'https://www.aljazeera.com/xml/rss/all.xml',
         'custom': dashSettings.customRssUrl
     };
-    const sourcesNames = { 
-        'dailystar': 'The Daily Star', 
-        'prothomalo': 'Prothom Alo', 
-        'business': 'Daily Star Business', 
-        'sports': 'Daily Star Sports', 
+    const sourcesNames = {
+        'dailystar': 'The Daily Star',
+        'prothomalo': 'Prothom Alo',
+        'business': 'Daily Star Business',
+        'sports': 'Daily Star Sports',
         'global': 'Al Jazeera',
         'custom': dashSettings.customRssName || 'Custom Feed'
     };
@@ -1075,39 +1075,39 @@ async function fetchNewsData(category, forceRefresh) {
     try {
         const cacheBuster = forceRefresh ? `?_t=${Date.now()}` : '';
         let fetchUrl = `${MY_PRIVATE_PROXY}?url=${encodeURIComponent(targetFeed + cacheBuster)}`;
-        
+
         const res = await fetchWithTimeout(fetchUrl, 8000);
         if (!res.ok) throw new Error("Proxy failed");
-        
+
         const xmlText = await res.text();
-        const parser = new DOMParser(); 
+        const parser = new DOMParser();
         const xml = parser.parseFromString(xmlText, "text/xml");
-        
+
         const nodes = Array.from(xml.querySelectorAll("item")).slice(0, 9);
         if(nodes.length === 0) throw new Error("No XML items");
 
         nodes.forEach(item => {
-            let title = item.querySelector("title")?.textContent || "News Article"; 
+            let title = item.querySelector("title")?.textContent || "News Article";
             let link = item.querySelector("link")?.textContent || "#";
-            let pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString(); 
-            let desc = item.querySelector("description")?.textContent || ""; 
+            let pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
+            let desc = item.querySelector("description")?.textContent || "";
             let content = item.getElementsByTagNameNS("*", "encoded")[0]?.textContent || "";
-            
-            let imgUrl = fallbackImg; 
-            let enclosure = item.querySelector("enclosure"); 
+
+            let imgUrl = fallbackImg;
+            let enclosure = item.querySelector("enclosure");
             let mediaContent = item.getElementsByTagNameNS("*", "content")[0];
-            
+
             if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
             else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
-            else { 
-                let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i); 
-                if (match) imgUrl = match[1]; 
+            else {
+                let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                if (match) imgUrl = match[1];
             }
-            
-            let dateObj = new Date(pubDate.replace(/-/g, '/')); 
-            let hAgo = Math.floor((Date.now() - dateObj.getTime()) / 3600000); 
+
+            let dateObj = new Date(pubDate.replace(/-/g, '/'));
+            let hAgo = Math.floor((Date.now() - dateObj.getTime()) / 3600000);
             let timeStr = isNaN(hAgo) ? "Recently" : (hAgo <= 0 ? "Just now" : hAgo + "h ago");
-            
+
             items.push({ title, link, imgUrl, source: sourcesNames[category], timeStr });
         });
         return items;
@@ -1129,18 +1129,36 @@ function renderNewsItems(items, container) {
     });
     container.innerHTML = html + '</div>';
     triggerMasonryUpdate();
-    setTimeout(triggerMasonryUpdate, 800); 
+    setTimeout(triggerMasonryUpdate, 800);
+}
+
+function renderNewsTabs() {
+    const container = document.getElementById('news-tabs-container');
+    if (!container) return;
+
+    let html = `
+        <div class="news-tab ${currentNewsCategory === 'dailystar' ? 'active' : ''}" id="tab-dailystar" onclick="fetchNews('dailystar')">The Daily Star</div>
+        <div class="news-tab ${currentNewsCategory === 'prothomalo' ? 'active' : ''}" id="tab-prothomalo" onclick="fetchNews('prothomalo')">Prothom Alo</div>
+        <div class="news-tab ${currentNewsCategory === 'business' ? 'active' : ''}" id="tab-business" onclick="fetchNews('business')">Business</div>
+        <div class="news-tab ${currentNewsCategory === 'sports' ? 'active' : ''}" id="tab-sports" onclick="fetchNews('sports')">Sports</div>
+        <div class="news-tab ${currentNewsCategory === 'global' ? 'active' : ''}" id="tab-global" onclick="fetchNews('global')">Global (Al Jazeera)</div>
+    `;
+
+    let customSources = JSON.parse(localStorage.getItem('dashboardCustomRssSources')) || [];
+    customSources.forEach(src => {
+        html += `<div class="news-tab ${currentNewsCategory === src.id ? 'active' : ''}" id="tab-${src.id}" onclick="fetchNews('${src.id}')">${escapeHtml(src.name)}</div>`;
+    });
+
+    container.innerHTML = html;
 }
 
 async function fetchNews(category, forceRefresh = false) {
     currentNewsCategory = category;
-    document.querySelectorAll('.news-tab').forEach(t => t.classList.remove('active'));
-    const t = document.getElementById(`tab-${category}`);
-    if(t) t.classList.add('active');
+    renderNewsTabs();
 
-    const c = document.getElementById('news-container'); 
+    const c = document.getElementById('news-container');
     if(!c) return;
-    
+
     const cacheKey = `news_cache_${category}`;
 
     if (!forceRefresh) {
@@ -1159,9 +1177,9 @@ async function fetchNews(category, forceRefresh = false) {
         if (items.length === 0) throw new Error("No items");
         sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), items: items }));
         renderNewsItems(items, c);
-    } catch(e) { 
-        c.innerHTML = "<div class='loading' style='color:var(--danger);'>Connection timeout. Click the refresh button to try again.</div>"; 
-        triggerMasonryUpdate(); 
+    } catch(e) {
+        c.innerHTML = "<div class='loading' style='color:var(--danger);'>Connection timeout. Click the refresh button to try again.</div>";
+        triggerMasonryUpdate();
     }
 }
 
