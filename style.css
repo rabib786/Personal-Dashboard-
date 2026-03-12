@@ -437,17 +437,40 @@ input, textarea, select, button { font-family: inherit; }
     --main-font: 'Orbitron', sans-serif;
     --border-radius: 0px;
 }
+@keyframes synthwave-grid {
+    0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+    100% { transform: perspective(500px) rotateX(60deg) translateY(30px); }
+}
 [data-theme-style="cyberpunk"] body {
     background: #0b0214 !important;
+}
+[data-theme-style="cyberpunk"] body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -50%; width: 200%; height: 200%;
     background-image: 
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
-    background-size: 30px 30px !important;
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: synthwave-grid 2s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+@keyframes cyber-glitch {
+    0% { clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transform: translate(0); }
+    20% { clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 10px); transform: translate(-2px, 2px); }
+    40% { clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 20px); transform: translate(2px, -2px); }
+    60% { clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transform: translate(0); }
+    80% { clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 10px); transform: translate(-1px, 1px); }
+    100% { clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); transform: translate(0); }
 }
 [data-theme-style="cyberpunk"] .card, 
 [data-theme-style="cyberpunk"] .modal-content {
     border: 2px solid var(--accent);
     clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+}
+[data-theme-style="cyberpunk"] .card:hover {
+    animation: cyber-glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 [data-theme-style="cyberpunk"] .fab-btn,
 [data-theme-style="cyberpunk"] .icon-btn,
