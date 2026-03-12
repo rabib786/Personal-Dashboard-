@@ -1231,10 +1231,17 @@ function renderCalendar() {
     let html = '<div class="calendar-grid">';
     ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(d => html += `<div class="calendar-header">${d}</div>`);
     for (let i = 0; i < viewDate.getDay(); i++) html += `<div class="calendar-day calendar-empty"></div>`;
+
+    // Performance optimization: create a Set/Map of dates to object for faster lookup O(1) inside loop
+    const holidaysMap = new Map();
+    if (holidaysData && holidaysData.length > 0) {
+        holidaysData.forEach(h => holidaysMap.set(h.date, h));
+    }
+
     for (let i = 1; i <= new Date(displayedYear, displayedMonth + 1, 0).getDate(); i++) {
         const dateStr = `${displayedYear}-${String(displayedMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         let isToday = (actualToday.getDate() === i && actualToday.getMonth() === displayedMonth && actualToday.getFullYear() === displayedYear) ? 'calendar-today' : '';
-        const hObj = holidaysData.find(h => h.date === dateStr);
+        const hObj = holidaysMap.get(dateStr);
         html += `<div class="calendar-day ${isToday} ${hObj ? 'calendar-holiday' : ''}" ${hObj ? `title="${hObj.name}"` : ''}>${i}</div>`;
     }
     const mc = document.getElementById('mini-calendar');
