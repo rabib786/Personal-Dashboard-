@@ -58,18 +58,20 @@ let dashSettings = {
 };
 
 function initTheme() {
+    const root = document.documentElement;
     let savedTheme = localStorage.getItem('dashboardTheme');
     if(!savedTheme) savedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    root.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
     applyBackground();
     applyVisuals();
 }
 
 function toggleTheme() {
-    let current = document.documentElement.getAttribute('data-theme');
+    const root = document.documentElement;
+    let current = root.getAttribute('data-theme');
     let next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
+    root.setAttribute('data-theme', next);
     localStorage.setItem('dashboardTheme', next);
     updateThemeIcon(next);
 }
@@ -80,11 +82,12 @@ function updateThemeIcon(theme) {
 }
 
 function applyBackground() {
+    const root = document.documentElement;
     // If a theme explicitly overrides the background in CSS (Terminal/Pixel/Cyberpunk),
     // setting inline background to '' lets the CSS take over.
     // If user explicitly chose 'solid' or 'image', we override the theme's background.
     if(dashSettings.bgType === 'solid') {
-        document.body.style.background = dashSettings.bgValue || (document.documentElement.getAttribute('data-theme')==='dark' ? '#141e30' : '#fdfbfb');
+        document.body.style.background = dashSettings.bgValue || (root.getAttribute('data-theme')==='dark' ? '#141e30' : '#fdfbfb');
     } else if(dashSettings.bgType === 'image') {
         document.body.style.background = `url('${dashSettings.bgValue}') center/cover no-repeat fixed`;
     } else {
