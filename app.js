@@ -1041,13 +1041,13 @@ function getLocalMoonPhase() {
 }
 
 function getWeatherDetails(code, isDay = 1) {
-    if (code === 0) return { desc: 'Clear', icon: isDay ? '<i class="ph-fill ph-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-moon" style="color: #a1a1a6;"></i>', bgClass: isDay ? 'weather-bg-clear-day' : 'weather-bg-clear-night' };
-    if ([1,2].includes(code)) return { desc: 'Cloudy', icon: isDay ? '<i class="ph-fill ph-cloud-sun" style="color: #fbbc04;"></i>' : '<i class="ph-fill ph-cloud-moon" style="color: #a1a1a6;"></i>', bgClass: isDay ? 'weather-bg-cloudy-day' : 'weather-bg-cloudy-night' };
-    if (code === 3) return { desc: 'Overcast', icon: '<i class="ph-fill ph-cloud" style="color: #a1a1a6;"></i>', bgClass: 'weather-bg-overcast' };
-    if ([45, 48].includes(code)) return { desc: 'Fog', icon: '<i class="ph-fill ph-cloud-fog" style="color: #a1a1a6;"></i>', bgClass: 'weather-bg-fog' };
-    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { desc: 'Rain', icon: '<i class="ph-fill ph-cloud-rain" style="color: #4285F4;"></i>', bgClass: 'weather-bg-rain', animClass: 'weather-anim-rain' };
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return { desc: 'Snow', icon: '<i class="ph-fill ph-cloud-snow" style="color: #8ec5fc;"></i>', bgClass: 'weather-bg-snow', animClass: 'weather-anim-snow' };
-    if ([95, 96, 99].includes(code)) return { desc: 'Storm', icon: '<i class="ph-fill ph-cloud-lightning" style="color: #ff9500;"></i>', bgClass: 'weather-bg-storm', animClass: 'weather-anim-rain' };
+    if (code === 0) return { desc: 'Clear', icon: isDay ? '<i class="ph-fill ph-sun"></i>' : '<i class="ph-fill ph-moon"></i>', bgClass: isDay ? 'weather-bg-clear-day' : 'weather-bg-clear-night' };
+    if ([1,2].includes(code)) return { desc: 'Cloudy', icon: isDay ? '<i class="ph-fill ph-cloud-sun"></i>' : '<i class="ph-fill ph-cloud-moon"></i>', bgClass: isDay ? 'weather-bg-cloudy-day' : 'weather-bg-cloudy-night' };
+    if (code === 3) return { desc: 'Overcast', icon: '<i class="ph-fill ph-cloud"></i>', bgClass: 'weather-bg-overcast' };
+    if ([45, 48].includes(code)) return { desc: 'Fog', icon: '<i class="ph-fill ph-cloud-fog"></i>', bgClass: 'weather-bg-fog' };
+    if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { desc: 'Rain', icon: '<i class="ph-fill ph-cloud-rain"></i>', bgClass: 'weather-bg-rain', animClass: 'weather-anim-rain' };
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return { desc: 'Snow', icon: '<i class="ph-fill ph-cloud-snow"></i>', bgClass: 'weather-bg-snow', animClass: 'weather-anim-snow' };
+    if ([95, 96, 99].includes(code)) return { desc: 'Storm', icon: '<i class="ph-fill ph-cloud-lightning"></i>', bgClass: 'weather-bg-storm', animClass: 'weather-anim-rain' };
     return { desc: 'Unknown', icon: '<i class="ph-fill ph-sun"></i>', bgClass: 'weather-bg-clear-day' };
 }
 function getWindDir(d) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]; }
