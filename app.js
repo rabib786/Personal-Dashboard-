@@ -1263,6 +1263,7 @@ function renderHolidayList() {
 }
 
 function escapeHtml(u) { return (u || '').replace(/[&<"'>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]); }
+function escapeRegex(string) { return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&'); }
 
 // --- 6. QUICK LINKS ---
 let shortcutsArr = JSON.parse(localStorage.getItem('dashboardBookmarks')) || [];
@@ -1447,7 +1448,7 @@ async function fetchNewsData(category, forceRefresh) {
     };
 
     let targetFeed = feeds[category];
-    const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
+    const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>").replace(/'/g, "%27");
 
     try {
         const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : '';
@@ -1474,6 +1475,8 @@ async function fetchNewsData(category, forceRefresh) {
             else if (item.enclosure && item.enclosure.link) imgUrl = item.enclosure.link;
             else {
                 let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                if (!match) match = desc.match(/<media:content[^>]+url=["']([^"']+)["']/i) || content.match(/<media:content[^>]+url=["']([^"']+)["']/i);
+                if (!match) match = desc.match(/<image[^>]*>\s*<url>([^<]+)<\/url>/i) || content.match(/<image[^>]*>\s*<url>([^<]+)<\/url>/i);
                 if (match) imgUrl = match[1];
             }
 
@@ -1512,12 +1515,18 @@ async function fetchNewsData(category, forceRefresh) {
                 let imgUrl = fallbackImg;
                 let enclosure = item.querySelector("enclosure");
                 let mediaContent = item.getElementsByTagNameNS("*", "content")[0];
+                let mediaGroupContent = item.querySelector("group > content") || item.getElementsByTagNameNS("*", "group")[0]?.getElementsByTagNameNS("*", "content")[0];
+                let imageTag = item.querySelector("image url") || item.getElementsByTagName("image")[0]?.getElementsByTagName("url")[0];
 
                 if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
                 else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
+                else if (mediaGroupContent && mediaGroupContent.getAttribute("url")) imgUrl = mediaGroupContent.getAttribute("url");
+                else if (imageTag && imageTag.textContent) imgUrl = imageTag.textContent;
                 else {
                     let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
-                    if (match) imgUrl = match[1];
+                    if (!match) match = xmlText.match(new RegExp(`<item>.*?<title>${escapeRegex(title)}.*?<media:content[^>]+url=["']([^"']+)["'].*?</item>`, 'is')) || xmlText.match(new RegExp(`<item>.*?<title>${title}.*?<media:content[^>]+url=["']([^"']+)["'].*?</item>`, 'is'));
+                    if (!match) match = xmlText.match(new RegExp(`<item>.*?<title>${escapeRegex(title)}.*?<image[^>]*>\\s*<url>([^<]+)</url>.*?</item>`, 'is')) || xmlText.match(new RegExp(`<item>.*?<title>${title}.*?<image[^>]*>\\s*<url>([^<]+)</url>.*?</item>`, 'is'));
+                    if (match && match[1]) imgUrl = match[1];
                 }
 
                 let dateObj = new Date(pubDate.replace(/-/g, '/'));
@@ -1535,7 +1544,7 @@ async function fetchNewsData(category, forceRefresh) {
 }
 
 function renderNewsItems(items, container) {
-    const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>");
+    const fallbackImg = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 256 256' fill='none' stroke='#a1a1a6' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'><rect x='32' y='48' width='192' height='160' rx='8'></rect><line x1='80' y1='104' x2='176' y2='104'></line><line x1='80' y1='144' x2='176' y2='144'></line></svg>").replace(/'/g, "%27");
     let html = '<div class="news-list">';
     items.forEach(p => {
         html += `
