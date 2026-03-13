@@ -343,17 +343,19 @@ function handleSubDrop(e, type, arrayObj, saveFunc, renderFunc) {
 function handleSubDragEnd(e) { if(dragSrcEl) dragSrcEl.classList.remove('dragging-item'); dragSrcEl = null; dragType = null; }
 
 // --- MASONRY ENGINE ---
+let cachedMasonryCards = null;
+
 function triggerMasonryUpdate() {
     setTimeout(() => {
-        document.querySelectorAll('.card').forEach(card => {
-            if(window.getComputedStyle(card).display === 'none') return;
+        if (!cachedMasonryCards) {
+            cachedMasonryCards = document.getElementsByClassName('card');
+        }
 
-            if(card.id === 'mod-search') {
-                card.style.gridRowEnd = `span ${Math.ceil(card.getBoundingClientRect().height) + 20}`;
-                return;
-            }
+        for (let i = 0; i < cachedMasonryCards.length; i++) {
+            const card = cachedMasonryCards[i];
+            if(window.getComputedStyle(card).display === 'none') continue;
             card.style.gridRowEnd = `span ${Math.ceil(card.getBoundingClientRect().height) + 20}`;
-        });
+        }
     }, 50);
 }
 
