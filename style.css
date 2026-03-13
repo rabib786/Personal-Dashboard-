@@ -237,17 +237,22 @@ input, textarea, select, button { font-family: inherit; }
 .calendar-today-btn { background: var(--inner-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: all 0.2s; }
 .calendar-today-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
 .calendar-month-name { font-weight: 700; font-size: 1.1rem; margin: 0; }
+[data-theme="dark"] .calendar-month-name::-webkit-calendar-picker-indicator,
+[data-theme-style="terminal"] .calendar-month-name::-webkit-calendar-picker-indicator,
+[data-theme-style="cyberpunk"] .calendar-month-name::-webkit-calendar-picker-indicator,
+[data-theme-style="e-ink"] .calendar-month-name::-webkit-calendar-picker-indicator { filter: invert(1); }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 6px; font-size: 0.9rem; margin-bottom: 10px; }
 .calendar-header { font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
 .calendar-day { padding: 8px 0; border-radius: 10px; cursor: default; transition: all 0.2s; font-weight: 500; }
-.calendar-day:hover:not(.calendar-empty) { background: var(--inner-bg); transform: scale(1.1); }
+.calendar-day:hover:not(.calendar-empty) { background: var(--accent); color: white; transform: scale(1.1); }
 .calendar-empty { pointer-events: none; }
 .calendar-today { background: var(--accent) !important; color: white; box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3); }
 .calendar-holiday { background: var(--danger-light); color: var(--danger); }
 .calendar-today.calendar-holiday { background: var(--danger) !important; color: white; box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3); }
 .holiday-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; max-height: 200px; }
-.holiday-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid var(--glass-border); transition: padding 0.3s;}
+.holiday-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid var(--glass-border); transition: all 0.3s;}
 .holiday-item:last-child { border-bottom: none; }
+.holiday-item:hover { background: var(--inner-bg); border-radius: 12px; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 .holiday-name { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px; }
 .holiday-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
 .holiday-countdown { color: var(--accent); font-weight: 700; font-size: 0.7rem; background: var(--inner-bg); padding: 4px 8px; border-radius: 8px; }

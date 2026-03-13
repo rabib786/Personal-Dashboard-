@@ -1174,6 +1174,7 @@ async function fetchWeather(lat, lon, locName) {
 let displayedYear = new Date().getFullYear(), displayedMonth = new Date().getMonth();
 function jumpToToday() { displayedYear = new Date().getFullYear(); displayedMonth = new Date().getMonth(); renderCalendar(); }
 function changeMonth(offset) { displayedMonth += offset; if (displayedMonth < 0) { displayedMonth = 11; displayedYear--; loadBDHolidays(displayedYear); } else if (displayedMonth > 11) { displayedMonth = 0; displayedYear++; loadBDHolidays(displayedYear); } else renderCalendar(); }
+function jumpToMonth(value) { if (!value) return; const [y, m] = value.split('-'); const ny = parseInt(y), nm = parseInt(m) - 1; if (ny !== displayedYear) { displayedYear = ny; displayedMonth = nm; loadBDHolidays(displayedYear); } else { displayedMonth = nm; renderCalendar(); } }
 let holidaysData = [];
 
 function loadBDHolidays(year) {
@@ -1228,8 +1229,8 @@ function loadBDHolidays(year) {
 
 function renderCalendar() {
     const actualToday = new Date(), viewDate = new Date(displayedYear, displayedMonth, 1);
-    const mn = document.getElementById('calendar-month-name');
-    if(mn) mn.innerText = viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const mp = document.getElementById('calendar-month-picker');
+    if(mp) mp.value = `${displayedYear}-${String(displayedMonth + 1).padStart(2, '0')}`;
     let html = '<div class="calendar-grid">';
     ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(d => html += `<div class="calendar-header">${d}</div>`);
     for (let i = 0; i < viewDate.getDay(); i++) html += `<div class="calendar-day calendar-empty"></div>`;
