@@ -1245,7 +1245,14 @@ function renderCalendar() {
         const dateStr = `${displayedYear}-${String(displayedMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
         let isToday = (actualToday.getDate() === i && actualToday.getMonth() === displayedMonth && actualToday.getFullYear() === displayedYear) ? 'calendar-today' : '';
         const hObj = holidaysMap.get(dateStr);
-        html += `<div class="calendar-day ${isToday} ${hObj ? 'calendar-holiday' : ''}" ${hObj ? `title="${hObj.name}"` : ''}>${i}</div>`;
+
+        let dayOfWeek = new Date(displayedYear, displayedMonth, i).getDay();
+        let isWeekend = (dayOfWeek === 5 || dayOfWeek === 6);
+
+        let holidayClass = (hObj || isWeekend) ? 'calendar-holiday' : '';
+        let titleAttr = hObj ? `title="${escapeHtml(hObj.name)}"` : (isWeekend ? `title="Weekend"` : '');
+
+        html += `<div class="calendar-day ${isToday} ${holidayClass}" ${titleAttr}>${i}</div>`;
     }
     const mc = document.getElementById('mini-calendar');
     if(mc) { mc.innerHTML = html + '</div>'; triggerMasonryUpdate(); }
