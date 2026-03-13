@@ -497,7 +497,7 @@ function renderBankApps() {
     bankAppsArr.forEach((app, i) => {
         html += `
             <div class="bank-app-wrapper" draggable="true" ondragstart="handleSubDragStart(event, 'bank')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'bank', bankAppsArr, saveBankApps, renderBankApps)" ondragend="handleSubDragEnd(event)">
-                <a href="${app.path}" target="_blank" class="app-tile">
+                <a href="${safeUrl(app.path)}" target="_blank" class="app-tile">
                     <i class="ph-fill ${app.icon}"></i>
                     <span>${escapeHtml(app.name)}</span>
                 </a>
@@ -1263,6 +1263,7 @@ function renderHolidayList() {
 }
 
 function escapeHtml(u) { return (u || '').replace(/[&<"'>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[m]); }
+function safeUrl(u, fallback = '#') { const str = String(u || '').replace(/[\s\x00-\x1f\x7f-\x9f]/g, '').trim(); return /^javascript:/i.test(str) ? fallback : escapeHtml(String(u || '').trim()); }
 
 // --- 6. QUICK LINKS ---
 let shortcutsArr = JSON.parse(localStorage.getItem('dashboardBookmarks')) || [];
@@ -1288,8 +1289,8 @@ function renderShortcuts() {
         html += `
             <div class="shortcut-item" draggable="true" ondragstart="handleSubDragStart(event, 'link')" ondragover="handleSubDragOver(event)" ondrop="handleSubDrop(event, 'link', shortcutsArr, saveShortcuts, renderShortcuts)" ondragend="handleSubDragEnd(event)">
                 <div class="sub-item-drag-handle" title="Drag to reorder"><i class="ph ph-dots-six-vertical"></i></div>
-                <a href="${sc.path}" target="_blank" style="display:flex; align-items:center; gap:8px; flex-grow:1; text-decoration:none; color:inherit;">
-                    <div class="shortcut-icon-wrapper"><img src="${favUrl}" alt="" onerror="${onErrorFallback}"></div>
+                <a href="${safeUrl(sc.path)}" target="_blank" style="display:flex; align-items:center; gap:8px; flex-grow:1; text-decoration:none; color:inherit;">
+                    <div class="shortcut-icon-wrapper"><img src="${safeUrl(favUrl)}" alt="" onerror="${onErrorFallback}"></div>
                     <div class="shortcut-info"><span class="shortcut-name" title="${escapeHtml(sc.name)}">${escapeHtml(sc.name)}</span></div>
                 </a>
                 <button class="delete-btn" aria-label="Remove Link" onclick="deleteShortcut(${i}, event)" title="Remove Link">&times;</button>
@@ -1541,8 +1542,8 @@ function renderNewsItems(items, container) {
     let html = '<div class="news-list">';
     items.forEach(p => {
         html += `
-            <a href="${p.link}" target="_blank" class="news-item">
-                <div class="news-image-wrapper"><img src="${p.imgUrl}" class="news-image" alt="Img" onerror="this.src='${fallbackImg}'"></div>
+            <a href="${safeUrl(p.link)}" target="_blank" class="news-item">
+                <div class="news-image-wrapper"><img src="${safeUrl(p.imgUrl, fallbackImg)}" class="news-image" alt="Img" onerror="this.src='${fallbackImg}'"></div>
                 <div class="news-content"><div class="news-title">${escapeHtml(p.title)}</div><div class="news-source">${p.source} &bull; ${p.timeStr}</div></div>
             </a>`;
     });
