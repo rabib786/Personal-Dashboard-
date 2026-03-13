@@ -1430,10 +1430,10 @@ const fetchWithTimeout = (url, ms) => Promise.race([ fetch(url), new Promise((_,
 async function fetchNewsData(category, forceRefresh) {
     let items = [];
     const feeds = {
-        'dailystar': 'https://www.thedailystar.net/frontpage/rss.xml',
+        'dailystar': 'https://www.thedailystar.net/rss.xml',
         'prothomalo': 'https://en.prothomalo.com/feed/',
-        'business': 'https://www.thedailystar.net/business/rss.xml',
-        'sports': 'https://www.thedailystar.net/sports/rss.xml',
+        'business': 'https://www.thedailystar.net/taxonomy/term/2/rss.xml',
+        'sports': 'https://www.thedailystar.net/taxonomy/term/3/rss.xml',
         'global': 'https://www.aljazeera.com/xml/rss/all.xml',
         'custom': dashSettings.customRssUrl
     };
@@ -1473,7 +1473,8 @@ async function fetchNewsData(category, forceRefresh) {
             if (item.thumbnail) imgUrl = item.thumbnail;
             else if (item.enclosure && item.enclosure.link) imgUrl = item.enclosure.link;
             else {
-                let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i) ||
+                            desc.match(/<source[^>]+srcset=["']([^"'\s]+)/i) || content.match(/<source[^>]+srcset=["']([^"'\s]+)/i);
                 if (match) imgUrl = match[1];
             }
 
@@ -1516,7 +1517,8 @@ async function fetchNewsData(category, forceRefresh) {
                 if (enclosure && enclosure.getAttribute("url")) imgUrl = enclosure.getAttribute("url");
                 else if (mediaContent && mediaContent.getAttribute("url")) imgUrl = mediaContent.getAttribute("url");
                 else {
-                    let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i);
+                    let match = desc.match(/<img[^>]+src=["']([^"']+)["']/i) || content.match(/<img[^>]+src=["']([^"']+)["']/i) ||
+                                desc.match(/<source[^>]+srcset=["']([^"'\s]+)/i) || content.match(/<source[^>]+srcset=["']([^"'\s]+)/i);
                     if (match) imgUrl = match[1];
                 }
 
