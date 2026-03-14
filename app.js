@@ -1004,11 +1004,21 @@ function saveManualCity() {
     if(city) { dashSettings.weatherCity = city; localStorage.setItem('dashSettings', JSON.stringify(dashSettings)); document.getElementById('weather-container').innerHTML = '<div class="loading">Fetching...</div>'; fetchWeatherForCity(); }
 }
 
-function getLocalMoonPhase() {
-    const now = new Date();
-    let year = now.getFullYear();
-    let month = now.getMonth() + 1;
-    let day = now.getDate();
+const MOON_PHASES = [
+    { name: "New Moon", icon: "ph-moon" },
+    { name: "Waxing Crescent", icon: "ph-moon" },
+    { name: "First Quarter", icon: "ph-moon" },
+    { name: "Waxing Gibbous", icon: "ph-moon" },
+    { name: "Full Moon", icon: "ph-moon-stars" },
+    { name: "Waning Gibbous", icon: "ph-moon" },
+    { name: "Last Quarter", icon: "ph-moon" },
+    { name: "Waning Crescent", icon: "ph-moon" }
+];
+
+function calculateMoonPhaseIndex(date) {
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
 
     if (month < 3) {
         year--;
@@ -1025,19 +1035,11 @@ function getLocalMoonPhase() {
     b = Math.round(jd * 8);
 
     if (b >= 8) b = 0;
+    return b;
+}
 
-    const phases = [
-        { name: "New Moon", icon: "ph-moon" },
-        { name: "Waxing Crescent", icon: "ph-moon" },
-        { name: "First Quarter", icon: "ph-moon" },
-        { name: "Waxing Gibbous", icon: "ph-moon" },
-        { name: "Full Moon", icon: "ph-moon-stars" },
-        { name: "Waning Gibbous", icon: "ph-moon" },
-        { name: "Last Quarter", icon: "ph-moon" },
-        { name: "Waning Crescent", icon: "ph-moon" }
-    ];
-
-    return phases[b];
+function getLocalMoonPhase() {
+    return MOON_PHASES[calculateMoonPhaseIndex(new Date())];
 }
 
 function getWeatherDetails(code, isDay = 1) {
