@@ -1052,6 +1052,13 @@ function getWeatherDetails(code, isDay = 1) {
 }
 function getWindDir(d) { return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]; }
 
+function getAqiInfo(aqi) {
+    if (aqi <= 50) return { l: 'Good', c: '#34c759' };
+    if (aqi <= 100) return { l: 'Moderate', c: '#ff9500' };
+    if (aqi <= 150) return { l: 'Unhealthy', c: '#ff3b30' };
+    return { l: 'Hazardous', c: '#af52de' };
+}
+
 function renderWeatherUI(data, aqiData, detailsDisplay) {
     const cur = data.current, day = data.daily, hr = data.hourly;
     const wInfo = getWeatherDetails(cur.weather_code, cur.is_day);
@@ -1077,7 +1084,7 @@ function renderWeatherUI(data, aqiData, detailsDisplay) {
     }
 
     const aqi = aqiData.current.us_aqi;
-    const aInfo = aqi<=50 ? {l:'Good',c:'#34c759'} : aqi<=100 ? {l:'Moderate',c:'#ff9500'} : aqi<=150 ? {l:'Unhealthy',c:'#ff3b30'} : {l:'Hazardous',c:'#af52de'};
+    const aInfo = getAqiInfo(aqi);
 
     let html = `
         <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
