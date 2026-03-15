@@ -775,3 +775,218 @@ input, textarea, select, button { font-family: inherit; }
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     filter: brightness(1.1);
 }
+
+/* --- THEME 7: MACOS --- */
+[data-os-theme="macos"] {
+    --glass-opacity: 0.6;
+    --glass-blur: 24px;
+    --glass-bg: rgba(255, 255, 255, var(--glass-opacity));
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --text-main: #1d1d1f;
+    --text-muted: #86868b;
+    --inner-bg: rgba(255, 255, 255, 0.5);
+    --modal-bg: rgba(255, 255, 255, 0.85);
+    --main-font: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --border-radius: 12px;
+}
+[data-theme="dark"][data-os-theme="macos"],
+@media (prefers-color-scheme: dark) {
+    :root[data-os-theme="macos"]:not([data-theme="light"]) {
+        --glass-bg: rgba(30, 30, 30, var(--glass-opacity));
+        --glass-border: rgba(255, 255, 255, 0.15);
+        --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        --text-main: #f5f5f7;
+        --text-muted: #a1a1a6;
+        --inner-bg: rgba(50, 50, 50, 0.4);
+        --modal-bg: rgba(30, 30, 30, 0.85);
+    }
+}
+[data-os-theme="macos"] .card {
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    background: var(--glass-bg);
+}
+[data-os-theme="macos"] .card-header {
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+[data-os-theme="macos"] .card-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+}
+[data-os-theme="macos"] .drag-header-group {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+}
+[data-os-theme="macos"] .drag-handle {
+    position: absolute;
+    left: 70px; /* Right of traffic lights */
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+[data-os-theme="macos"] .card:hover .drag-handle {
+    opacity: 1;
+}
+
+/* MacOS Traffic Lights */
+.macos-window-controls {
+    display: none;
+    gap: 8px;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+[data-os-theme="macos"] .macos-window-controls {
+    display: flex;
+}
+.macos-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+.macos-btn i {
+    font-size: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: rgba(0,0,0,0.6);
+}
+.macos-window-controls:hover .macos-btn i {
+    opacity: 1;
+}
+.macos-close { background-color: #ff5f56; border: 0.5px solid #e0443e; }
+.macos-min { background-color: #ffbd2e; border: 0.5px solid #dea123; }
+.macos-max { background-color: #27c93f; border: 0.5px solid #1aab29; }
+
+[data-os-theme="macos"] .card-header .icon-btn,
+[data-os-theme="macos"] .card-header .btn-clean {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+[data-os-theme="macos"] #mod-notepad .card-header #notepad-list-actions {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+[data-os-theme="macos"] #mod-notepad .card-header #notepad-edit-actions {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    margin-right: 0;
+}
+
+
+/* MacOS Dock */
+#os-dock-container {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
+    pointer-events: none; /* Let clicks pass through container */
+}
+.os-dock {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 8px;
+    display: flex;
+    gap: 10px;
+    box-shadow: var(--glass-shadow);
+    pointer-events: auto; /* Re-enable clicks for dock */
+}
+.os-dock-item {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--inner-bg);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), margin 0.2s;
+    position: relative;
+}
+.os-dock-item:hover {
+    transform: scale(1.3) translateY(-10px);
+    margin: 0 10px;
+    z-index: 10;
+    background: var(--glass-bg);
+}
+.os-dock-indicator {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--text-main);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.os-dock-item.active .os-dock-indicator {
+    opacity: 1;
+}
+.os-dock-tooltip {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--modal-bg);
+    color: var(--text-main);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.os-dock-item:hover .os-dock-tooltip {
+    opacity: 1;
+}
+
+/* Modifiers for Maximize state */
+.card.macos-maximized {
+    grid-column: span 3 !important;
+}
+@media (max-width: 1100px) { .card.macos-maximized { grid-column: span 2 !important; } }
+@media (max-width: 768px) { .card.macos-maximized { grid-column: span 1 !important; } }

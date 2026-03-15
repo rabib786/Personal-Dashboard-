@@ -49,7 +49,7 @@
 
                 <div style="margin-bottom: 15px;">
                     <label class="toggle-label" for="set-theme" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">Theme Engine</label>
-                    <select id="set-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;">
+                    <select id="set-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;" onchange="toggleOsThemeVisibility()">
                         <option value="glass">Glassmorphism (Default UI)</option>
                         <option value="cyberpunk">Cyberpunk 2077 (Neon & Edges)</option>
                         <option value="terminal">Terminal (Hacker Monospace)</option>
@@ -57,6 +57,18 @@
                         <option value="brutalism">Neo-Brutalism</option>
                         <option value="e-ink">Deep Space / E-Ink</option>
                         <option value="material">Material You</option>
+                    </select>
+                </div>
+
+                <div class="form-group toggle-row" style="margin-bottom: 15px;">
+                    <label class="toggle-label" for="set-os-theme-toggle">Enable OS Theme Engine</label>
+                    <input type="checkbox" id="set-os-theme-toggle" style="width: 20px; height: 20px; accent-color: var(--accent);" onchange="toggleOsThemeVisibility()">
+                </div>
+
+                <div id="os-theme-selector" style="margin-bottom: 15px; display: none;">
+                    <label class="toggle-label" for="set-os-theme" style="font-size: 0.85rem; display:block; margin-bottom: 5px;">OS Theme</label>
+                    <select id="set-os-theme" class="form-control" style="padding: 8px 12px; font-weight: bold; cursor: pointer;">
+                        <option value="macos">macOS</option>
                     </select>
                 </div>
 
@@ -399,6 +411,12 @@
             </div>
         </div>
 
+    </div>
+
+    <div id="os-dock-container" style="display: none;">
+        <div id="os-dock" class="os-dock">
+            <!-- Dock items will be injected here -->
+        </div>
     </div>
 
     <script src="app.js"></script>
