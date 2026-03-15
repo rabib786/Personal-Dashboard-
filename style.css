@@ -830,6 +830,10 @@ input, textarea, select, button { font-family: inherit; }
     text-align: center;
     width: 100%;
     justify-content: center;
+    padding: 0 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 [data-os-theme="macos"] .drag-header-group {
     position: absolute;
@@ -887,7 +891,9 @@ input, textarea, select, button { font-family: inherit; }
 .macos-max { background-color: #27c93f; border: 0.5px solid #1aab29; }
 
 [data-os-theme="macos"] .card-header .icon-btn,
-[data-os-theme="macos"] .card-header .btn-clean {
+[data-os-theme="macos"] .card-header .btn-clean,
+[data-os-theme="macos"] .card-header .calendar-today-btn,
+[data-os-theme="macos"] .card-header > div:not(.drag-header-group):not(.macos-window-controls):last-child {
     position: absolute;
     right: 15px;
     top: 50%;
