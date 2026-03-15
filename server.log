@@ -1,0 +1,15 @@
+127.0.0.1 - - [14/Mar/2026 11:25:38] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2026 11:25:39] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2026 11:25:39] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2026 11:25:40] code 404, message File not found
+127.0.0.1 - - [14/Mar/2026 11:25:40] "GET /service-worker.js HTTP/1.1" 404 -
+127.0.0.1 - - [14/Mar/2026 11:25:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2026 11:25:56] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2026 11:25:56] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [14/Mar/2026 11:25:57] code 404, message File not found
+127.0.0.1 - - [14/Mar/2026 11:25:57] "GET /service-worker.js HTTP/1.1" 404 -
+127.0.0.1 - - [15/Mar/2026 07:07:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [15/Mar/2026 07:07:25] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Mar/2026 07:07:25] "GET /app.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Mar/2026 07:07:27] code 404, message File not found
+127.0.0.1 - - [15/Mar/2026 07:07:27] "GET /service-worker.js HTTP/1.1" 404 -
