@@ -116,15 +116,38 @@ function applyVisuals() {
     root.setAttribute('data-theme-style', dashSettings.themeStyle);
 
     // Inject OS Theme Class
+    const topBar = document.getElementById('macos-top-bar');
     if (dashSettings.osThemeEnabled) {
         root.setAttribute('data-os-theme', dashSettings.osTheme);
         document.getElementById('os-dock-container').style.display = 'flex';
         injectMacOSControls();
         renderOsDock();
+        if (topBar && dashSettings.osTheme === 'macos') {
+            topBar.style.display = 'flex';
+        }
     } else {
         root.removeAttribute('data-os-theme');
         document.getElementById('os-dock-container').style.display = 'none';
         removeMacOSControls();
+        if (topBar) {
+            topBar.style.display = 'none';
+        }
+    }
+
+    if (dashSettings.osThemeEnabled && dashSettings.osTheme === 'macos') {
+        if (typeof initMacosWindows === 'function') initMacosWindows();
+    } else {
+        // Revert macOS free-floating styles
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.position = '';
+            card.style.left = '';
+            card.style.top = '';
+            card.style.zIndex = '';
+            card.style.margin = '';
+        });
+        const dashboard = document.getElementById('dashboard-grid');
+        if (dashboard) dashboard.style.display = ''; // Reset back to grid display via CSS class
+        setTimeout(triggerMasonryUpdate, 100);
     }
 
     // Inject Custom Accent Color
@@ -549,6 +572,8 @@ function handleSubDragEnd(e) { if(dragSrcEl) dragSrcEl.classList.remove('draggin
 let cachedMasonryCards = null;
 
 function triggerMasonryUpdate() {
+    if (dashSettings.osThemeEnabled && dashSettings.osTheme === 'macos') return; // Disable masonry update for macOS mode
+
     setTimeout(() => {
         if (!cachedMasonryCards) {
             cachedMasonryCards = document.getElementsByClassName('card');
@@ -570,11 +595,109 @@ function toggleSection(contentId, chevronId, storageKey) {
     triggerMasonryUpdate();
 }
 
+
+// --- MACOS WINDOW ENGINE ---
+let macosZIndexCounter = 100;
+function initMacosWindows() {
+    const dashboard = document.getElementById('dashboard-grid');
+    if (!dashSettings.osThemeEnabled || dashSettings.osTheme !== 'macos') return;
+
+    // Reset grid layout
+    dashboard.style.display = 'block';
+
+    const savedPositions = JSON.parse(localStorage.getItem('macosWindowPositions')) || {};
+
+    document.querySelectorAll('.card').forEach((card, index) => {
+        if (card.id === 'mod-search') return; // Skip search bar if it exists
+
+        card.style.position = 'absolute';
+        card.style.margin = '0'; // Remove grid gaps
+
+        if (savedPositions[card.id]) {
+            card.style.left = savedPositions[card.id].x + 'px';
+            card.style.top = savedPositions[card.id].y + 'px';
+            if (savedPositions[card.id].z) {
+                card.style.zIndex = savedPositions[card.id].z;
+                macosZIndexCounter = Math.max(macosZIndexCounter, savedPositions[card.id].z + 1);
+            }
+        } else {
+            // Initial scatter placement
+            card.style.left = (50 + (index * 40 % 300)) + 'px';
+            card.style.top = (80 + (index * 40 % 300)) + 'px';
+            card.style.zIndex = macosZIndexCounter++;
+        }
+
+        // Make window bring-to-front on mousedown
+        card.addEventListener('mousedown', () => {
+            if (!dashSettings.osThemeEnabled || dashSettings.osTheme !== 'macos') return;
+            card.style.zIndex = macosZIndexCounter++;
+            saveMacosPositions();
+        });
+
+        // Setup drag
+        const handle = card.querySelector('.drag-handle');
+        if (handle) {
+            handle.onmousedown = function(e) {
+                if (!dashSettings.osThemeEnabled || dashSettings.osTheme !== 'macos') return;
+                e.preventDefault(); // Prevent native HTML5 drag
+
+                // Disable normal grid dragging
+                card.setAttribute('draggable', 'false');
+
+                let startX = e.clientX;
+                let startY = e.clientY;
+                let startLeft = parseInt(window.getComputedStyle(card).left, 10) || 0;
+                let startTop = parseInt(window.getComputedStyle(card).top, 10) || 0;
+
+                card.style.zIndex = macosZIndexCounter++;
+                card.classList.add('macos-dragging');
+
+                function onMouseMove(e) {
+                    let dx = e.clientX - startX;
+                    let dy = e.clientY - startY;
+                    card.style.left = (startLeft + dx) + 'px';
+                    card.style.top = (startTop + dy) + 'px';
+                }
+
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    card.classList.remove('macos-dragging');
+                    saveMacosPositions();
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            };
+        }
+    });
+}
+
+function saveMacosPositions() {
+    const positions = {};
+    document.querySelectorAll('.card').forEach(card => {
+        if (card.id !== 'mod-search' && card.style.position === 'absolute') {
+            positions[card.id] = {
+                x: parseInt(card.style.left, 10) || 0,
+                y: parseInt(card.style.top, 10) || 0,
+                z: parseInt(card.style.zIndex, 10) || 100
+            };
+        }
+    });
+    localStorage.setItem('macosWindowPositions', JSON.stringify(positions));
+}
+
 // --- MAIN CARD DRAG AND DROP ENGINE ---
 function initDragAndDrop() {
     const dashboard = document.getElementById('dashboard-grid');
     let draggedItem = null;
     const savedOrder = JSON.parse(localStorage.getItem('dashboardLayout'));
+
+    // If macOS theme, initialize windows instead and return early to disable grid D&D
+    if (dashSettings.osThemeEnabled && dashSettings.osTheme === 'macos') {
+        initMacosWindows();
+        return;
+    }
 
     const searchEl = document.getElementById('mod-search');
 
@@ -622,6 +745,20 @@ function startClock() {
 
     function updateTime() {
         const now = new Date(); const hour = now.getHours(); const min = now.getMinutes();
+
+        // Update MacOS top bar clock
+        const topTimeEl = document.getElementById('macos-top-time');
+        if (topTimeEl && dashSettings.osThemeEnabled && dashSettings.osTheme === 'macos') {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayStr = days[now.getDay()];
+            let tHr = hour;
+            const tMin = String(min).padStart(2, '0');
+            const ampm = tHr >= 12 ? 'PM' : 'AM';
+            if (!dashSettings.clock24Enabled) {
+                tHr = tHr % 12 || 12;
+            }
+            topTimeEl.textContent = `${dayStr} ${tHr}:${tMin} ${dashSettings.clock24Enabled ? '' : ampm}`;
+        }
         let greeting = "Good Evening"; let iconClass = "ph-moon-stars";
         if (hour >= 5 && hour < 12) { greeting = "Good Morning"; iconClass = "ph-sun-horizon"; }
         else if (hour >= 12 && hour < 17) { greeting = "Good Afternoon"; iconClass = "ph-sun"; }
@@ -1864,5 +2001,116 @@ document.addEventListener('click', function(e) {
     const isInteractive = e.target.closest('button, .btn, a, input, select, .card, .news-item, .fab-btn, .action-btn, .icon-btn');
     if (isInteractive) {
         playThemeSound();
+    }
+});
+
+
+// macOS Context Menu Logic
+document.addEventListener('contextmenu', (e) => {
+    const isMacOs = dashSettings.osThemeEnabled && dashSettings.osTheme === 'macos';
+    if (!isMacOs) return;
+
+    // Check if clicked directly on dashboard background or document body
+    if (e.target === document.body || e.target.classList.contains('dashboard') || e.target === document.documentElement) {
+        e.preventDefault();
+        const menu = document.getElementById('macos-context-menu');
+        if (!menu) return;
+
+        menu.style.display = 'flex';
+
+        // Positioning
+        let x = e.pageX;
+        let y = e.pageY;
+
+        // Keep within bounds
+        const menuWidth = 240;
+        const menuHeight = menu.offsetHeight || 100;
+
+        if (x + menuWidth > window.innerWidth) {
+            x = window.innerWidth - menuWidth - 5;
+        }
+        if (y + menuHeight > window.innerHeight) {
+            y = window.innerHeight - menuHeight - 5;
+        }
+
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+    }
+});
+
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('macos-context-menu');
+    if (menu && menu.style.display !== 'none') {
+        menu.style.display = 'none';
+    }
+});
+
+function triggerMissionControl() {
+    const isMacOs = dashSettings.osThemeEnabled && dashSettings.osTheme === 'macos';
+    if (!isMacOs) return;
+
+    const cards = document.querySelectorAll('.card');
+    let isCurrentlyActive = document.body.classList.contains('mission-control-mode');
+
+    if (isCurrentlyActive) {
+        document.body.classList.remove('mission-control-mode');
+        cards.forEach(card => {
+            card.classList.remove('mission-control-active');
+            card.style.transform = card.dataset.originalTransform || '';
+            // Allow card interaction to resume
+            card.style.pointerEvents = '';
+        });
+    } else {
+        document.body.classList.add('mission-control-mode');
+
+        // Calculate grid for Mission Control
+        const visibleCards = Array.from(cards).filter(c => window.getComputedStyle(c).display !== 'none');
+        const count = visibleCards.length;
+        const cols = count > 6 ? 4 : 3;
+
+        const cellWidth = (window.innerWidth * 0.9) / cols;
+        const rows = Math.ceil(count / cols);
+        const cellHeight = (window.innerHeight * 0.8) / rows;
+
+        const startX = window.innerWidth * 0.05;
+        const startY = window.innerHeight * 0.1;
+
+        visibleCards.forEach((card, i) => {
+            card.classList.add('mission-control-active');
+            // Save original transform/position if not already saved
+            card.dataset.originalTransform = card.style.transform || '';
+
+            // Current position of the absolute card
+            const rect = card.getBoundingClientRect();
+            // Center of the target cell
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const targetX = startX + (col * cellWidth) + (cellWidth / 2);
+            const targetY = startY + (row * cellHeight) + (cellHeight / 2);
+
+            // Calculate vector from current center to target center
+            const currentCenterX = rect.left + rect.width / 2;
+            const currentCenterY = rect.top + rect.height / 2;
+
+            const diffX = targetX - currentCenterX;
+            const diffY = targetY - currentCenterY;
+
+            // Apply scale and translation
+            card.style.transform = `translate(${diffX}px, ${diffY}px) scale(0.65)`;
+            card.style.zIndex = 100000 + i;
+            // Prevent interaction while in mission control
+            card.style.pointerEvents = 'none';
+        });
+    }
+}
+
+
+// Close mission control when clicking the blurred background
+document.addEventListener('click', (e) => {
+    if (document.body.classList.contains('mission-control-mode')) {
+        // If clicking anywhere on the background (body or dashboard root)
+        if (e.target === document.body || e.target.classList.contains('dashboard') || e.target === document.documentElement) {
+            triggerMissionControl();
+        }
     }
 });

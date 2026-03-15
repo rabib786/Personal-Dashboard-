@@ -17,6 +17,27 @@
 </head>
 <body>
 
+    <!-- MACOS NATIVE TOP BAR -->
+    <nav id="macos-top-bar" class="macos-top-bar" style="display: none;">
+        <div class="macos-top-left">
+            <div class="macos-apple-logo"><i class="ph-fill ph-apple-logo"></i></div>
+            <div class="macos-menu-item active-app">Dashboard</div>
+            <div class="macos-menu-item">File</div>
+            <div class="macos-menu-item">Edit</div>
+            <div class="macos-menu-item">View</div>
+            <div class="macos-menu-item">Window</div>
+            <div class="macos-menu-item">Help</div>
+        </div>
+        <div class="macos-top-right">
+            <div class="macos-icon-item"><i class="ph-bold ph-battery-full"></i></div>
+            <div class="macos-icon-item"><i class="ph-bold ph-wifi-high"></i></div>
+            <div class="macos-icon-item"><i class="ph-bold ph-magnifying-glass"></i></div>
+            <div class="macos-icon-item"><i class="ph-bold ph-faders"></i></div>
+            <div class="macos-time-item" id="macos-top-time">Mon 9:41 AM</div>
+        </div>
+    </nav>
+
+
     <div class="fab-container">
         <button class="fab-btn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme"><i id="theme-icon" class="ph ph-moon"></i></button>
         <button class="fab-btn" onclick="openSettings()" title="Settings" aria-label="Open Settings"><i class="ph ph-gear"></i></button>
@@ -417,6 +438,15 @@
         <div id="os-dock" class="os-dock">
             <!-- Dock items will be injected here -->
         </div>
+    </div>
+
+    <!-- MACOS CONTEXT MENU -->
+    <div id="macos-context-menu" class="macos-context-menu" style="display: none;">
+        <div class="macos-context-item" onclick="triggerMissionControl()">Mission Control</div>
+        <div class="macos-context-separator"></div>
+        <div class="macos-context-item" onclick="openSettings()">Change Desktop Background...</div>
+        <div class="macos-context-separator"></div>
+        <div class="macos-context-item" onclick="toggleTheme()">Toggle Dark Mode</div>
     </div>
 
     <script src="app.js"></script>
