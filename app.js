@@ -54,7 +54,12 @@ let dashSettings = {
     visibility: rawSettings.visibility || defaultVis,
     // NEW THEME STATE
     themeStyle: rawSettings.themeStyle || 'glass',
-    accentColor: rawSettings.accentColor || '#0066cc'
+    accentColor: rawSettings.accentColor || '#0066cc',
+
+    // OS THEME STATE
+    osThemeEnabled: rawSettings.osThemeEnabled || false,
+    osTheme: rawSettings.osTheme || 'macos',
+    minimizedModules: rawSettings.minimizedModules || []
 };
 
 function initTheme() {
@@ -110,6 +115,18 @@ function applyVisuals() {
     // Inject Theme Style Class
     root.setAttribute('data-theme-style', dashSettings.themeStyle);
 
+    // Inject OS Theme Class
+    if (dashSettings.osThemeEnabled) {
+        root.setAttribute('data-os-theme', dashSettings.osTheme);
+        document.getElementById('os-dock-container').style.display = 'flex';
+        injectMacOSControls();
+        renderOsDock();
+    } else {
+        root.removeAttribute('data-os-theme');
+        document.getElementById('os-dock-container').style.display = 'none';
+        removeMacOSControls();
+    }
+
     // Inject Custom Accent Color
     if(dashSettings.accentColor) {
         root.style.setProperty('--accent', dashSettings.accentColor);
@@ -144,6 +161,163 @@ function getThemeIconWeight() {
     return iconWeight;
 }
 
+// --- OS THEME LOGIC ---
+function injectMacOSControls() {
+    document.querySelectorAll('.card').forEach(card => {
+        // Search bar doesn't get window controls
+        if(card.id === 'mod-search') return;
+
+        const header = card.querySelector('.card-header');
+        if (header && !header.querySelector('.macos-window-controls')) {
+            const controls = document.createElement('div');
+            controls.className = 'macos-window-controls';
+
+            const moduleId = card.id.replace('mod-', '');
+
+            controls.innerHTML = `
+                <button class="macos-btn macos-close" onclick="osCloseModule('${moduleId}')"><i class="ph-bold ph-x"></i></button>
+                <button class="macos-btn macos-min" onclick="osMinimizeModule('${moduleId}')"><i class="ph-bold ph-minus"></i></button>
+                <button class="macos-btn macos-max" onclick="osMaximizeModule('${card.id}')"><i class="ph-bold ph-corners-out"></i></button>
+            `;
+
+            header.insertBefore(controls, header.firstChild);
+        }
+    });
+}
+
+function removeMacOSControls() {
+    document.querySelectorAll('.macos-window-controls').forEach(el => el.remove());
+}
+
+function osCloseModule(moduleId) {
+    if (!dashSettings.visibility) dashSettings.visibility = {};
+    dashSettings.visibility[moduleId] = false;
+
+    // Also remove from minimized state if it was there
+    dashSettings.minimizedModules = dashSettings.minimizedModules.filter(id => id !== moduleId);
+
+    localStorage.setItem('dashSettings', JSON.stringify(dashSettings));
+    applyLayoutVisibility();
+    renderOsDock();
+    triggerMasonryUpdate();
+}
+
+function osMinimizeModule(moduleId) {
+    if (!dashSettings.minimizedModules) dashSettings.minimizedModules = [];
+    if (!dashSettings.minimizedModules.includes(moduleId)) {
+        dashSettings.minimizedModules.push(moduleId);
+    }
+
+    // Also remove maximized class if it's minimized
+    const card = document.getElementById(`mod-${moduleId}`);
+    if (card) {
+        card.classList.remove('macos-maximized');
+    }
+
+    localStorage.setItem('dashSettings', JSON.stringify(dashSettings));
+    applyLayoutVisibility();
+    renderOsDock();
+    triggerMasonryUpdate();
+}
+
+function osMaximizeModule(cardId) {
+    const card = document.getElementById(cardId);
+    if (card) {
+        card.classList.toggle('macos-maximized');
+        triggerMasonryUpdate();
+    }
+}
+
+function renderOsDock() {
+    const dock = document.getElementById('os-dock');
+    if (!dock) return;
+
+    // If OS Theme is disabled, clear and hide
+    if (!dashSettings.osThemeEnabled) {
+        dock.innerHTML = '';
+        return;
+    }
+
+    // Modules map with icons and labels
+    const dockItems = [
+        { id: 'search', icon: 'ph-magnifying-glass', label: 'Search' },
+        { id: 'time', icon: 'ph-clock', label: 'Clock' },
+        { id: 'tasks', icon: 'ph-check-square-offset', label: 'Tasks' },
+        { id: 'torn', icon: 'ph-crosshair', label: 'Torn' },
+        { id: 'bank', icon: 'ph-briefcase', label: 'Bank Tools' },
+        { id: 'weather', icon: 'ph-cloud-sun', label: 'Weather' },
+        { id: 'calendar', icon: 'ph-calendar-blank', label: 'Calendar' },
+        { id: 'shortcuts', icon: 'ph-link', label: 'Quick Links' },
+        { id: 'notepad', icon: 'ph-notepad', label: 'Notes' },
+        { id: 'news', icon: 'ph-newspaper', label: 'News' }
+    ];
+
+    let html = '';
+
+    dockItems.forEach(item => {
+        // Only show modules in dock that are active in user settings (not explicitly hidden)
+        if (dashSettings.visibility && dashSettings.visibility[item.id] === false) {
+            return;
+        }
+
+        // Determine state
+        const isMinimized = dashSettings.minimizedModules && dashSettings.minimizedModules.includes(item.id);
+        const isActive = !isMinimized; // Currently visible on dashboard grid
+
+        const activeClass = isActive ? 'active' : '';
+        const themeIconWeight = getThemeIconWeight();
+
+        html += `
+            <div class="os-dock-item ${activeClass}" onclick="osToggleModuleFromDock('${item.id}')">
+                <i class="${themeIconWeight} ${item.icon}"></i>
+                <div class="os-dock-indicator"></div>
+                <div class="os-dock-tooltip">${item.label}</div>
+            </div>
+        `;
+    });
+
+    dock.innerHTML = html;
+}
+
+function osToggleModuleFromDock(moduleId) {
+    if (!dashSettings.minimizedModules) dashSettings.minimizedModules = [];
+
+    // If it's minimized, restore it
+    if (dashSettings.minimizedModules.includes(moduleId)) {
+        dashSettings.minimizedModules = dashSettings.minimizedModules.filter(id => id !== moduleId);
+    } else {
+        // If it's open, minimize it
+        dashSettings.minimizedModules.push(moduleId);
+
+        // Ensure maximized class is removed when minimizing
+        const card = document.getElementById(`mod-${moduleId}`);
+        if (card) {
+            card.classList.remove('macos-maximized');
+        }
+    }
+
+    localStorage.setItem('dashSettings', JSON.stringify(dashSettings));
+    applyLayoutVisibility();
+    renderOsDock();
+    triggerMasonryUpdate();
+
+    // Find the card and scroll to it if we just restored it
+    if (!dashSettings.minimizedModules.includes(moduleId)) {
+        // We need a slight delay to allow the element to be display:flex again before scrolling
+        setTimeout(() => {
+            const card = document.getElementById(`mod-${moduleId}`);
+            if (card) {
+                // Visual feedback
+                card.style.transform = 'scale(1.02)';
+                card.style.transition = 'transform 0.3s ease';
+                setTimeout(() => { card.style.transform = ''; }, 300);
+
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 50);
+    }
+}
+
 // Observe DOM mutations to apply icon weights to dynamically added elements
 const iconObserver = new MutationObserver(mutations => {
     const iconWeight = getThemeIconWeight();
@@ -176,7 +350,11 @@ function applyLayoutVisibility() {
     for (let key in map) {
         const el = document.getElementById(map[key]);
         if (el) {
-            if(dashSettings.visibility[key] === false) {
+            // Check if hidden by user settings OR if it's minimized in OS theme
+            const isHidden = dashSettings.visibility[key] === false;
+            const isMinimized = dashSettings.osThemeEnabled && dashSettings.minimizedModules.includes(key);
+
+            if(isHidden || isMinimized) {
                 el.style.display = 'none';
             } else {
                 el.style.display = 'flex';
@@ -212,6 +390,11 @@ function openSettings() {
     document.getElementById('set-theme').value = dashSettings.themeStyle || 'glass';
     document.getElementById('set-accent').value = dashSettings.accentColor || '#0066cc';
 
+    // OS Theme
+    document.getElementById('set-os-theme-toggle').checked = dashSettings.osThemeEnabled;
+    document.getElementById('set-os-theme').value = dashSettings.osTheme || 'macos';
+    toggleOsThemeVisibility();
+
     // Layout Toggles
     document.getElementById('set-compact').checked = dashSettings.compactMode;
     Object.keys(defaultVis).forEach(k => {
@@ -222,6 +405,16 @@ function openSettings() {
     selectBgType(dashSettings.bgType);
     document.getElementById('set-bg-val').value = dashSettings.bgValue;
     document.getElementById('settings-modal').classList.add('active');
+}
+
+function toggleOsThemeVisibility() {
+    const isOsThemeEnabled = document.getElementById('set-os-theme-toggle').checked;
+    const osThemeSelector = document.getElementById('os-theme-selector');
+    if (isOsThemeEnabled) {
+        osThemeSelector.style.display = 'block';
+    } else {
+        osThemeSelector.style.display = 'none';
+    }
 }
 
 function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
@@ -246,6 +439,16 @@ function saveSettings() {
     // Visuals
     dashSettings.themeStyle = document.getElementById('set-theme').value;
     dashSettings.accentColor = document.getElementById('set-accent').value;
+
+    // OS Theme
+    dashSettings.osThemeEnabled = document.getElementById('set-os-theme-toggle').checked;
+    dashSettings.osTheme = document.getElementById('set-os-theme').value;
+
+    // When settings save, restore all minimized windows to clear state
+    // to prevent getting stuck if OS theme is toggled off
+    if (!dashSettings.osThemeEnabled) {
+        dashSettings.minimizedModules = [];
+    }
 
     // Layout Toggles
     dashSettings.compactMode = document.getElementById('set-compact').checked;
@@ -456,6 +659,9 @@ function startClock() {
 function initDashboard() {
     initTheme();
     applyLayoutVisibility();
+
+    // Safety check: ensure minified arrays are initialized
+    if (!dashSettings.minimizedModules) dashSettings.minimizedModules = [];
 
     if (localStorage.getItem('holidayState') === 'open') { document.getElementById('holiday-list').style.display = 'block'; document.getElementById('holiday-chevron').classList.add('open'); }
 
